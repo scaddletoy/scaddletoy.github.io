@@ -235,7 +235,6 @@ export default function EditorPage({ viewModelId }: EditorPageProps) {
     if (viewModelId) {
       const model = await SupabaseService.fetchModelById(viewModelId);
       setViewModel(model);
-      console.debug('Fetched model details:', model);
       setEditModel({
         id: model?.id,
         title: model?.title ?? 'Untitled Model',

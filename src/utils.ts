@@ -44,8 +44,8 @@ export function logMethod<T extends (...args: any[]) => any>(fn: T, prefix?: str
     const definitionSite = extractCallSite(new Error());
     return ((...args: any[]) => {
       const callSite = extractCallSite(new Error());
-      const argPairs = paramNames.map((name, i) => `${name}=${JSON.stringify(args[i])}`).join(', ');
-      console.debug(`[DEV] ${definitionSite}${fn.name}(${argPairs}) @ ${callSite}`);
+      const argDict = Object.fromEntries(paramNames.map((name, i) => [name, args[i]]));
+      console.debug(`[DEV] ${definitionSite}${fn.name}() @ ${callSite}`, argDict);
       return fn(...args);
     }) as T;
   }
