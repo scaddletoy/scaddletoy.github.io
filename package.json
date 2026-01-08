@@ -9,7 +9,7 @@
     "lint": "eslint .",
     "lint-fix": "eslint . --fix",
     "preview": "vite preview",
-    "deploy": "tsc -b && node scripts/build-libs.js all && vite build && gh-pages -d dist",
+    "build:github": "tsc -b && node scripts/build-libs.js all && vite build",
     "build:libs": "node scripts/build-libs.js all"
   },
   "dependencies": {
@@ -54,7 +54,6 @@
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-react-hooks": "^7.0.1",
     "eslint-plugin-react-refresh": "^0.4.24",
-    "gh-pages": "^6.3.0",
     "globals": "^16.5.0",
     "prettier": "3.7.4",
     "rollup-plugin-visualizer": "^6.0.5",
