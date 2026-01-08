@@ -22,3 +22,11 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# custom
+libs
+.env
+public/libraries/*.zip
+
+src/wasm
+stats.html

@@ -1,0 +1,8 @@
+{
+  "experimentalTernaries": true,
+  "experimentalOperatorPosition": "start",
+  "printWidth": 100,
+  "singleQuote": true,
+  "quoteProps": "consistent",
+  "endOfLine": "lf"
+}

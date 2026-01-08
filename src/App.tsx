@@ -1,35 +1,67 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { Navbar } from './components/navbar.tsx';
+import { Route, Routes } from 'react-router-dom';
+import { Footer } from './components/footer.tsx';
+import { NotFoundPage } from './pages/NotFoundPage.tsx';
+import { lazy, Suspense } from 'react';
+import { CenteredSpinner } from './components/CenteredSpinner.tsx';
+
+const HomePage = lazy(() => import('./pages/HomePage.tsx'));
+const ModelGallery = lazy(() => import('./pages/ModelGallery.tsx'));
+const EditorPage = lazy(() => import('./pages/EditorPage.tsx'));
+const ZenFSPage = lazy(() => import('./pages/ZenFSPage.tsx'));
+const AboutPage = lazy(() => import('./pages/AboutPage.tsx'));
+const TermsAndPrivacyPage = lazy(() => import('./pages/TermsAndPrivacyPage.tsx'));
+const LibrariesPage = lazy(() => import('./pages/LibrariesPage.tsx'));
+const SearchPage = lazy(() => import('./pages/SearchPage.tsx'));
+const UserPage = lazy(() => import('./pages/UserPage.tsx'));
 
 function App() {
-  const [count, setCount] = useState(0)
-
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
+    <div
+      style={{
+        display: 'flex',
+        flexDirection: 'column',
+        minHeight: '100vh',
+        minWidth: '100vw',
+        transition: 'background 0.3s, color 0.3s',
+      }}
+    >
+      <div className="nav" style={{ flex: '0 0 auto', background: '#000' }}>
+        <Navbar />
       </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
+      <div
+        className="maxw app"
+        style={{
+          flex: '1 1 auto',
+          width: '100%',
+          display: 'flex',
+          flexDirection: 'column',
+          marginTop: 16,
+          marginBottom: 16,
+          gap: 16,
+        }}
+      >
+        <Suspense fallback={<CenteredSpinner text="Loading page" />}>
+          <Routes>
+            <Route path="/" element={<HomePage />} />
+            <Route path="/user/:username/*" element={<UserPage />} />
+            <Route path="/tag/:tag" element={<ModelGallery />} />
+            <Route path="/about" element={<AboutPage />} />
+            <Route path="/terms" element={<TermsAndPrivacyPage />} />
+            <Route path="/search" element={<SearchPage />} />
+            <Route path="/zenfs" element={<ZenFSPage />} />
+            <Route path="/model/:modelId" element={<EditorPage />} />
+            <Route path="/model/new" element={<EditorPage />} />
+            <Route path="/libraries" element={<LibrariesPage />} />
+            <Route path="*" element={<NotFoundPage />} />
+          </Routes>
+        </Suspense>
       </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+      <div className="nav" style={{ flex: '0 0 auto', background: '#000' }}>
+        <Footer />
+      </div>
+    </div>
+  );
 }
 
-export default App
+export default App;

@@ -1,73 +1,22 @@
-# React + TypeScript + Vite
+# About ScaddleToy
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+**ScaddleToy** is a web-based OpenSCAD playground and model gallery. It allows users to write, edit, and preview OpenSCAD code directly in the browser, leveraging a WASM-compiled OpenSCAD engine.
 
-Currently, two official plugins are available:
+It is built with Vite, React, PrimeReact, Supabase, ZenFS, Google Model Viewer and Monaco Editor. ScaddleToy aims to make parametric 3D modeling accessible and collaborative for everyone.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## AI Disclaimer
 
-## React Compiler
+Some parts of ScaddleToy were developed under the assistance of AI tools (GitHub Copilot, OpenAI). Without AI, ScaddleToy would not have been possible in the amount of time I (markusmo3) put into it. I am an advocate of AI and its potential to change the world, even though i also see the risks and downsides. When AI is used as a tool, instead of just blindly relying on it, it can increase the efficiency and sometimes even quality of the work. The fact that I was able to very quickly develop ScaddleToy in an MVP manner is a testament to this. I do find it important to clearly label AI-generated and AI-assisted content, though.
 
-The React Compiler is currently not compatible with SWC. See [this issue](https://github.com/vitejs/vite-plugin-react/issues/428) for tracking the progress.
+If you as a user of ScaddleToy use AI to generate source code, please at least label it as such and give credit to relevant sources.
 
-## Expanding the ESLint configuration
+## Support
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+You can support development by reporting bugs on [GitHub](https://github.com/scaddletoy/scaddletoy.github.io). You can also support the project by [buying me a coffee](https://buymeacoffee.com/markusmo3).
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+## Credits
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+ScaddleToy is created by [Markus Moser (@markusmo3)](https://github.com/markusmo3). Its source code is licensed under GNU GPL v2 while it is deployed under the GNU GPL v3 license because of the (GPLv3 and Apache 2.0) dependencies it links with. For more information about the license, please refer to [Terms & Privacy](#/terms) page.
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
-
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
-
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+A very special thanks to Íñigo Quílez and Pol Jeremias for creating [Shadertoy](https://www.shadertoy.com/), and Reinder Nijhoff for creating [Turtletoy](https://turtletoy.net/). Their work inspired the creation of ScaddleToy.
+Another huge thanks goes to Olivier Chafik for creating the original [OpenSCAD playground](https://ochafik.com/openscad2), on which the core editor functionality of ScaddleToy is mostly based.

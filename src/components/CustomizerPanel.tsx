@@ -1,0 +1,232 @@
+// Portions of this file are Copyright 2021 Google LLC, and licensed under GPL2+. See COPYING.
+
+import React, { CSSProperties } from 'react';
+
+import { Dropdown } from 'primereact/dropdown';
+import { Slider } from 'primereact/slider';
+import { Checkbox } from 'primereact/checkbox';
+import { InputNumber } from 'primereact/inputnumber';
+import { InputText } from 'primereact/inputtext';
+import { Fieldset } from 'primereact/fieldset';
+import { Button } from 'primereact/button';
+import { Parameter, ParameterSet } from '../services/openscad-wasm-runner/actions.ts';
+import { CenteredSpinner } from './CenteredSpinner.tsx';
+
+interface CustomizerProps {
+  className?: string;
+  style?: CSSProperties;
+  parameterSet?: ParameterSet;
+  parameterValues: { [key: string]: any };
+  onChange: (name: string, value: any) => void;
+}
+
+export default function CustomizerPanel(props: CustomizerProps) {
+  const groupedParameters = (props.parameterSet?.parameters ?? []).reduce(
+    (acc, param) => {
+      if (!acc[param.group]) {
+        acc[param.group] = [];
+      }
+      acc[param.group].push(param);
+      return acc;
+    },
+    {} as { [key: string]: any[] },
+  );
+
+  const groups = Object.entries(groupedParameters);
+
+  return props.parameterSet ?
+      <div
+        className={props.className}
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          overflowY: 'scroll',
+          // overflowX: 'hidden',
+          padding: 16,
+          ...props.style,
+          bottom: 'unset',
+        }}
+      >
+        {groups.map(([group, params]) => (
+          <Fieldset
+            style={{
+              width: '99%',
+              backgroundColor: 'transparent',
+              // backgroundColor: 'rgba(255,255,255,0.4)',
+            }}
+            key={group}
+            legend={group}
+            toggleable={true}
+          >
+            {params.map((param) => (
+              <ParameterInput
+                key={param.name}
+                value={props.parameterValues[param.name]}
+                param={param}
+                handleChange={props.onChange}
+              />
+            ))}
+          </Fieldset>
+        ))}
+      </div>
+    : <CenteredSpinner style={props.style} text="Waiting for customizer to run" />;
+}
+
+function ParameterInput({
+  param,
+  value,
+  className,
+  style,
+  handleChange,
+}: {
+  param: Parameter;
+  value: any;
+  className?: string;
+  style?: CSSProperties;
+  handleChange: (key: string, value: any) => void;
+}) {
+  return (
+    <div
+      style={{
+        flex: 1,
+        ...style,
+        display: 'flex',
+        marginTop: 8,
+        marginBottom: 8,
+        flexDirection: 'column',
+      }}
+    >
+      <div
+        style={{
+          flex: 1,
+          display: 'flex',
+          gap: 8,
+          flexDirection: 'row',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          flexWrap: 'wrap',
+        }}
+      >
+        <div
+          style={{
+            flex: 1,
+            display: 'flex',
+            flexDirection: 'column',
+            minWidth: 100,
+          }}
+        >
+          <label>
+            <b>{param.name}</b>
+          </label>
+          <div style={{ wordBreak: 'break-all' }}>{param.caption}</div>
+        </div>
+        <div
+          style={{
+            flex: 1,
+            display: 'flex',
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+          }}
+        >
+          {param.type === 'number' && 'options' in param && (
+            <Dropdown
+              style={{ flex: 1 }}
+              value={value || param.initial}
+              options={param.options}
+              onChange={(e) => handleChange(param.name, e.value)}
+              optionLabel="name"
+              optionValue="value"
+            />
+          )}
+          {param.type === 'string' && param.options && (
+            <Dropdown
+              value={value || param.initial}
+              options={param.options}
+              onChange={(e) => handleChange(param.name, e.value)}
+              optionLabel="name"
+              optionValue="value"
+            />
+          )}
+          {param.type === 'boolean' && (
+            <Checkbox
+              checked={value ?? param.initial}
+              onChange={(e) => handleChange(param.name, e.checked)}
+            />
+          )}
+          {!Array.isArray(param.initial) && param.type === 'number' && !('options' in param) && (
+            <InputNumber
+              style={{ flex: 1 }}
+              value={value || param.initial}
+              showButtons
+              size={5}
+              onValueChange={(e) => handleChange(param.name, e.value)}
+            />
+          )}
+          {param.type === 'string' && !param.options && (
+            <InputText
+              style={{ flex: 1 }}
+              value={value || param.initial}
+              onChange={(e) => handleChange(param.name, e.target.value)}
+            />
+          )}
+          {Array.isArray(param.initial) && 'min' in param && (
+            <div
+              style={{
+                flex: 1,
+                display: 'flex',
+                flexDirection: 'row',
+              }}
+            >
+              {param.initial.map((_, index) => (
+                <InputNumber
+                  style={{ flex: 1 }}
+                  key={index}
+                  value={value?.[index] ?? (param.initial as any)[index]}
+                  min={param.min}
+                  max={param.max}
+                  showButtons
+                  size={5}
+                  step={param.step}
+                  onValueChange={(e) => {
+                    const newArray = [...(value ?? param.initial)];
+                    newArray[index] = e.value;
+                    handleChange(param.name, newArray);
+                  }}
+                />
+              ))}
+            </div>
+          )}
+          <Button
+            onClick={() => handleChange(param.name, param.initial)}
+            style={{
+              marginRight: '0',
+              visibility:
+                value === undefined || JSON.stringify(value) === JSON.stringify(param.initial) ?
+                  'hidden'
+                : 'visible',
+            }}
+            tooltipOptions={{ position: 'left' }}
+            icon="pi pi-refresh"
+            className="p-button-text"
+          />
+        </div>
+      </div>
+      {!Array.isArray(param.initial) && param.type === 'number' && param.min !== undefined && (
+        <Slider
+          style={{
+            flex: 1,
+            minHeight: '5px',
+            margin: '5px 40px 5px 5px',
+          }}
+          value={value || param.initial}
+          min={param.min}
+          max={param.max}
+          step={param.step}
+          onChange={(e) => handleChange(param.name, e.value)}
+        />
+      )}
+    </div>
+  );
+}
