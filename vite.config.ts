@@ -63,7 +63,7 @@ export default defineConfig({
         entryFileNames: 'index.js',
         assetFileNames: '[name][extname]',
       },
-      external: ['model-viewer', 'monaco-editor'],
+      external: ['model-viewer'],
     },
     target: 'es2022',
     outDir: 'dist',

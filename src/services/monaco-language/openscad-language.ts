@@ -1,6 +1,7 @@
 // Portions of this file are Copyright 2021 Google LLC, and licensed under GPL2+. See COPYING.
 
-import * as monaco from 'monaco-editor';
+import type * as monaco from 'monaco-editor';
+import { MonacoInstance } from './openscad-register-language.ts';
 
 const builtInFunctionNames = [
   'abs',
@@ -87,70 +88,72 @@ const builtInVarNames = [
   '$vpt',
 ];
 
-const conf: monaco.languages.LanguageConfiguration = {
-  colorizedBracketPairs: [
-    ['{', '}'],
-    ['(', ')'],
-    ['[', ']'],
-  ],
+const getConf = (monacoInstance: MonacoInstance): monaco.languages.LanguageConfiguration => {
+  return {
+    colorizedBracketPairs: [
+      ['{', '}'],
+      ['(', ')'],
+      ['[', ']'],
+    ],
 
-  wordPattern:
-    /(-?\d*\.\d\w*)|([^\`\~\!\@\#\%\^\&\*\(\)\-\=\+\[\{\]\}\\\|\;\:\'\"\,\.\<\>\/\?\s]+)/g,
-  comments: {
-    lineComment: '//',
-    blockComment: ['/*', '*/'],
-  },
-  brackets: [
-    ['{', '}'],
-    ['[', ']'],
-    ['(', ')'],
-  ],
-  onEnterRules: [
-    {
-      beforeText: /^\s*\/\*\*(?!\/)([^\*]|\*(?!\/))*$/,
-      afterText: /^\s*\*\/$/,
-      action: {
-        indentAction: monaco.languages.IndentAction.IndentOutdent,
-        appendText: ' * ',
+    wordPattern:
+      /(-?\d*\.\d\w*)|([^\`\~\!\@\#\%\^\&\*\(\)\-\=\+\[\{\]\}\\\|\;\:\'\"\,\.\<\>\/\?\s]+)/g,
+    comments: {
+      lineComment: '//',
+      blockComment: ['/*', '*/'],
+    },
+    brackets: [
+      ['{', '}'],
+      ['[', ']'],
+      ['(', ')'],
+    ],
+    onEnterRules: [
+      {
+        beforeText: /^\s*\/\*\*(?!\/)([^\*]|\*(?!\/))*$/,
+        afterText: /^\s*\*\/$/,
+        action: {
+          indentAction: monacoInstance.languages.IndentAction.IndentOutdent,
+          appendText: ' * ',
+        },
+      },
+      {
+        beforeText: /^\s*\/\*\*(?!\/)([^\*]|\*(?!\/))*$/,
+        action: {
+          indentAction: monacoInstance.languages.IndentAction.None,
+          appendText: ' * ',
+        },
+      },
+      {
+        beforeText: /^(\t|(\ \ ))*\ \*(\ ([^\*]|\*(?!\/))*)?$/,
+        action: {
+          indentAction: monacoInstance.languages.IndentAction.None,
+          appendText: '* ',
+        },
+      },
+      {
+        beforeText: /^(\t|(\ \ ))*\ \*\/\s*$/,
+        action: {
+          indentAction: monacoInstance.languages.IndentAction.None,
+          removeText: 1,
+        },
+      },
+    ],
+    autoClosingPairs: [
+      { open: '{', close: '}' },
+      { open: '[', close: ']' },
+      { open: '(', close: ')' },
+      { open: '"', close: '"', notIn: ['string'] },
+      { open: "'", close: "'", notIn: ['string', 'comment'] },
+      { open: '`', close: '`', notIn: ['string', 'comment'] },
+      { open: '/**', close: ' */', notIn: ['string'] },
+    ],
+    folding: {
+      markers: {
+        start: new RegExp('^\\s*//\\s*#?region\\b'),
+        end: new RegExp('^\\s*//\\s*#?endregion\\b'),
       },
     },
-    {
-      beforeText: /^\s*\/\*\*(?!\/)([^\*]|\*(?!\/))*$/,
-      action: {
-        indentAction: monaco.languages.IndentAction.None,
-        appendText: ' * ',
-      },
-    },
-    {
-      beforeText: /^(\t|(\ \ ))*\ \*(\ ([^\*]|\*(?!\/))*)?$/,
-      action: {
-        indentAction: monaco.languages.IndentAction.None,
-        appendText: '* ',
-      },
-    },
-    {
-      beforeText: /^(\t|(\ \ ))*\ \*\/\s*$/,
-      action: {
-        indentAction: monaco.languages.IndentAction.None,
-        removeText: 1,
-      },
-    },
-  ],
-  autoClosingPairs: [
-    { open: '{', close: '}' },
-    { open: '[', close: ']' },
-    { open: '(', close: ')' },
-    { open: '"', close: '"', notIn: ['string'] },
-    { open: "'", close: "'", notIn: ['string', 'comment'] },
-    { open: '`', close: '`', notIn: ['string', 'comment'] },
-    { open: '/**', close: ' */', notIn: ['string'] },
-  ],
-  folding: {
-    markers: {
-      start: new RegExp('^\\s*//\\s*#?region\\b'),
-      end: new RegExp('^\\s*//\\s*#?endregion\\b'),
-    },
-  },
+  };
 };
 
 const language: monaco.languages.IMonarchLanguage = {
@@ -244,6 +247,6 @@ const language: monaco.languages.IMonarchLanguage = {
 };
 
 export default {
-  conf,
+  getConf,
   language,
 };

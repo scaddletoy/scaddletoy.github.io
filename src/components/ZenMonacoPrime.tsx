@@ -5,9 +5,11 @@ import { TreeSelect } from 'primereact/treeselect';
 import { Menu } from 'primereact/menu';
 import { TreeNode } from 'primereact/treenode';
 import { Button } from 'primereact/button';
-import * as monaco from 'monaco-editor';
 import { CenteredSpinner } from './CenteredSpinner.tsx';
 import { useDebounceFn } from '../react-utils.ts';
+import type * as monaco from 'monaco-editor';
+import { registerOpenSCADLanguage } from '../services/monaco-language/openscad-register-language.ts';
+import { zipArchives } from '../services/fs/zip-archives.ts';
 
 interface ZenMonacoPrimeProps {
   style?: CSSProperties;
@@ -150,31 +152,32 @@ const ZenMonacoPrime = function ZenMonacoPrime(props: ZenMonacoPrimeProps) {
   );
 
   const onMount = (editor: monaco.editor.IStandaloneCodeEditor, monaco: Monaco) => {
-    editor.addAction({
+    monaco.editor.addAction({
       id: 'openscad-save-do-nothing',
       label: 'Save (disabled)',
       keybindings: [monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyS],
       run: () => {},
     });
     // https://code.visualstudio.com/docs/reference/default-keybindings
-    monaco.editor.addKeybindingRules([
+    monaco.monaco.editor.addKeybindingRules([
       {
         keybinding: monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyD,
-        command: 'editor.action.deleteLines',
+        command: 'monaco.editor.action.deleteLines',
       },
       {
         keybinding: monaco.KeyMod.CtrlCmd | monaco.KeyMod.Shift | monaco.KeyCode.KeyD,
-        command: 'editor.action.copyLinesDownAction',
+        command: 'monaco.editor.action.copyLinesDownAction',
       },
       {
         keybinding: monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyK,
-        command: 'editor.action.quickCommand',
+        command: 'monaco.editor.action.quickCommand',
       },
       {
         keybinding: monaco.KeyCode.F8,
         command: undefined,
       },
     ]);
+    registerOpenSCADLanguage(monaco, fs, '/', zipArchives);
     setEditor(editor);
     setMonacoInstance(monaco);
   };
@@ -183,7 +186,7 @@ const ZenMonacoPrime = function ZenMonacoPrime(props: ZenMonacoPrimeProps) {
     if (!editor || !monacoInstance) return;
     const model = editor.getModel();
     if (!model) return;
-    monacoInstance.editor.setModelMarkers(model, 'openscad', props.markers ?? []);
+    monacoInstance.monaco.editor.setModelMarkers(model, 'openscad', props.markers ?? []);
   }, [props.markers]);
 
   useEffect(() => {

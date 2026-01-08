@@ -22,18 +22,16 @@ import { EditModel, SupabaseService, ViewModelDetails } from '../services/Supaba
 import { Toast } from 'primereact/toast';
 import defaultScad from '../components/default-scad.ts';
 import { createEditorZenFS, readFileSafe, writeFileSafe } from '../services/fs/filesystem.ts';
-import { registerOpenSCADLanguage } from '../services/monaco-language/openscad-register-language.ts';
-import { zipArchives } from '../services/fs/zip-archives.ts';
 import { InputTextarea } from 'primereact/inputtextarea';
 import { exportStl } from '../services/io/export_stl';
 import { ProgressSpinner } from 'primereact/progressspinner';
 import { ModelStats } from '../components/ModelStats.tsx';
 import { formatDate, getHashQueryParam, hashSha1, sanitizeAndLinkify } from '../utils.ts';
-import * as monaco from 'monaco-editor';
 import { CommentsCard } from '../components/CommentsCard';
 import { CenteredSpinner } from '../components/CenteredSpinner.tsx';
 import { useParams } from 'react-router-dom';
 import { useUserContext } from '../state/UseUserContext.tsx';
+import type * as monaco from 'monaco-editor';
 
 type EditorPageProps = {
   viewModelId?: string;
@@ -100,10 +98,6 @@ export default function EditorPage({ viewModelId }: EditorPageProps) {
     },
     [currentModelId, getIndexScadFilePath],
   );
-
-  const initMonacoEditor = useCallback(async () => {
-    registerOpenSCADLanguage(fs, '/', zipArchives);
-  }, []);
 
   const customizer = useCallback(async () => {
     setRunningTaskName('Checking Syntax...');
@@ -265,7 +259,7 @@ export default function EditorPage({ viewModelId }: EditorPageProps) {
         const viewModel = await fetchModelDetails();
         await createEditorZenFS(true);
         await initFiles(viewModel);
-        await Promise.all([initMonacoEditor(), customizer(), preview()]);
+        await Promise.all([customizer(), preview()]);
         setIsLoading(false);
       })();
     }
@@ -274,7 +268,7 @@ export default function EditorPage({ viewModelId }: EditorPageProps) {
       if (offFileUrl) URL.revokeObjectURL(offFileUrl);
       if (stlFileUrl) URL.revokeObjectURL(stlFileUrl);
     };
-  }, [customizer, fetchModelDetails, initFiles, initMonacoEditor, preview]);
+  }, [customizer, fetchModelDetails, initFiles, preview]);
 
   function downloadUrl(url: string, filename: string) {
     const a = document.createElement('a');

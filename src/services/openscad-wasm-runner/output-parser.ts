@@ -1,4 +1,4 @@
-import * as monaco from 'monaco-editor';
+import type * as monaco from 'monaco-editor';
 import { MergedOutputs } from './openscad-runner.ts';
 
 const ignoredLogs = new Set(['Could not initialize localization.']);
@@ -44,7 +44,7 @@ export function parseMergedOutputs(
       endLineNumber: Number(line),
       endColumn: 1000,
       message: error,
-      severity: monaco.MarkerSeverity.Error,
+      severity: 8, // monacoInstance.MarkerSeverity.Error
     });
   };
   const shiftSourceName = opts.shiftSourceLines && opts.shiftSourceLines.sourcePath;
@@ -84,7 +84,7 @@ export function parseMergedOutputs(
           endLineNumber: getLine(file, line),
           endColumn: 1000,
           message: warning,
-          severity: monaco.MarkerSeverity.Warning,
+          severity: 4, // monacoInstance.MarkerSeverity.Warning,
         });
         continue;
       }
