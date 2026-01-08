@@ -9,7 +9,7 @@
     "lint": "eslint .",
     "lint-fix": "eslint . --fix",
     "preview": "vite preview",
-    "build:github": "tsc -b && node scripts/build-libs.js all && vite build",
+    "build:github": "node scripts/build-libs.js all && tsc -b && vite build",
     "build:libs": "node scripts/build-libs.js all"
   },
   "dependencies": {
