@@ -1,0 +1,17 @@
+<!-- This file is required for GitHub Pages to redirect all 404s to index.html for SPA routing. -->
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>Redirecting...</title>
+    <meta http-equiv="refresh" content="0; url=/#/" />
+    <script>
+      // Redirect to hash route, preserving path and query
+      if (location.pathname !== '/index.html') {
+        const hashPath = location.pathname + location.search + location.hash;
+        location.replace('/#' + hashPath);
+      }
+    </script>
+  </head>
+  <body></body>
+</html>
+

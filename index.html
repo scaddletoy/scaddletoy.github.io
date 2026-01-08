@@ -2,13 +2,73 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>scaddletoy.github.io</title>
-    <script type="module" crossorigin src="/assets/index-BWMuc5b_.js"></script>
-    <link rel="stylesheet" crossorigin href="/assets/index-COcDBgFa.css">
-  </head>
+    <title>ScaddleToy</title>
+
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
+    <link rel="manifest" href="/site.webmanifest" />
+
+    <script>
+      // Redirect to hash route, preserving path and query
+      if (location.pathname !== '/index.html' && location.pathname !== '/') {
+        console.log('Redirecting to hash route', location.pathname);
+        const hashPath = location.pathname + location.search + location.hash;
+        location.replace('/#' + hashPath);
+      }
+    </script>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Noto+Emoji:wght@300..700&family=Rubik+Doodle+Shadow&family=Rubik:ital,wght@0,300..900;1,300..900&display=swap"
+      rel="stylesheet"
+    />
+    <link href="https://fonts.cdnfonts.com/css/liberation-sans" rel="stylesheet" />
+    <!--    <link href="https://fonts.cdnfonts.com/css/liberation-serif" rel="stylesheet">-->
+    <link href="https://fonts.cdnfonts.com/css/jetbrains-mono-2" rel="stylesheet" />
+
+    <link rel="prefetch" href="openscad.wasm" />
+    <link rel="prefetch" href="libraries/fonts.zip" />
+
+    <link rel="prefetch" href="libraries/MCAD.zip" />
+    <link rel="prefetch" href="libraries/BOSL2.zip" />
+    <link rel="prefetch" href="libraries/BOSL.zip" />
+    <link rel="prefetch" href="libraries/NopSCADlib.zip" />
+    <link rel="prefetch" href="libraries/FunctionalOpenSCAD.zip" />
+    <link rel="prefetch" href="libraries/funcutils.zip" />
+    <link rel="prefetch" href="libraries/smooth-prim.zip" />
+    <link rel="prefetch" href="libraries/closepoints.zip" />
+    <link rel="prefetch" href="libraries/plot-function.zip" />
+    <link rel="prefetch" href="libraries/YAPP_Box.zip" />
+    <link rel="prefetch" href="libraries/Stemfie_OpenSCAD.zip" />
+    <link rel="prefetch" href="libraries/UB.scad.zip" />
+    <link rel="prefetch" href="libraries/openscad-tray.zip" />
+
+    <!--    <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/4.0.0/model-viewer.min.js"></script>-->
+    <script
+      type="module"
+      src="https://cdnjs.cloudflare.com/ajax/libs/model-viewer/4.1.0/model-viewer.min.js"
+      integrity="sha512-PMy/x5h09gVKwc21Cdcgu/VWJwgmeJ7uivJkbTar3vh5t8uzYo3NQgTkZE0fsfUd+9vihkAcLNAh6mv9mEXkZQ=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    ></script>
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.53.0/min/vs/loader.min.js"
+      integrity="sha512-ZG31AN9z/CQD1YDDAK4RUAvogwbJHv6bHrumrnMLzdCrVu4HeAqrUX7Jsal/cbUwXGfaMUNmQU04tQ8XXl5Znw=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    ></script>
+    <script type="module" crossorigin src="/index.js"></script>
+    <link rel="stylesheet" crossorigin href="/index.css">
+  <link rel="manifest" href="/manifest.webmanifest"><script id="vite-plugin-pwa:register-sw" src="/registerSW.js"></script></head>
   <body>
+    <audio id="complete-sound">
+      <source src="complete.wav" type="audio/wav" />
+      Your browser does not support the audio element.
+    </audio>
+    <noscript>You need to enable JavaScript to run the ScaddleToy.</noscript>
     <div id="root"></div>
   </body>
 </html>
