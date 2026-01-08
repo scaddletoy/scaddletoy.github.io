@@ -136,7 +136,7 @@ async function createZip(sourceDir, outputPath, includes = [], excludes = [], wo
 }
 
 async function linkOrCopy(src, dest) {
-  if (process.platform === 'win32') {
+  if (process.platform === 'win32' || process.env.GITHUB_ACTIONS === 'true') {
     // On Windows, copy the file instead of symlinking
     await fs.copyFile(src, dest);
   } else {
