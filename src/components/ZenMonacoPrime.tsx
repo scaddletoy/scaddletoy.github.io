@@ -1,5 +1,5 @@
 import React, { CSSProperties, useCallback, useEffect, useRef, useState } from 'react';
-import Editor, { Monaco } from '@monaco-editor/react';
+import Editor, { type Monaco } from '@monaco-editor/react';
 import { fs } from '@zenfs/core';
 import { TreeSelect } from 'primereact/treeselect';
 import { Menu } from 'primereact/menu';
@@ -151,35 +151,36 @@ const ZenMonacoPrime = function ZenMonacoPrime(props: ZenMonacoPrimeProps) {
     [debouncedSave],
   );
 
-  const onMount = (editor: monaco.editor.IStandaloneCodeEditor, monaco: Monaco) => {
-    monaco.editor.addAction({
+  const onMount = (editor: monaco.editor.IStandaloneCodeEditor, monacoInstance: Monaco) => {
+    monacoInstance.editor.addEditorAction({
       id: 'openscad-save-do-nothing',
       label: 'Save (disabled)',
-      keybindings: [monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyS],
+      keybindings: [monacoInstance.KeyMod.CtrlCmd | monacoInstance.KeyCode.KeyS],
       run: () => {},
     });
     // https://code.visualstudio.com/docs/reference/default-keybindings
-    monaco.monaco.editor.addKeybindingRules([
+    monacoInstance.editor.addKeybindingRules([
       {
-        keybinding: monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyD,
+        keybinding: monacoInstance.KeyMod.CtrlCmd | monacoInstance.KeyCode.KeyD,
         command: 'monaco.editor.action.deleteLines',
       },
       {
-        keybinding: monaco.KeyMod.CtrlCmd | monaco.KeyMod.Shift | monaco.KeyCode.KeyD,
+        keybinding:
+          monacoInstance.KeyMod.CtrlCmd | monacoInstance.KeyMod.Shift | monacoInstance.KeyCode.KeyD,
         command: 'monaco.editor.action.copyLinesDownAction',
       },
       {
-        keybinding: monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyK,
+        keybinding: monacoInstance.KeyMod.CtrlCmd | monacoInstance.KeyCode.KeyK,
         command: 'monaco.editor.action.quickCommand',
       },
       {
-        keybinding: monaco.KeyCode.F8,
+        keybinding: monacoInstance.KeyCode.F8,
         command: undefined,
       },
     ]);
-    registerOpenSCADLanguage(monaco, fs, '/', zipArchives);
+    registerOpenSCADLanguage(monacoInstance, fs, '/', zipArchives);
     setEditor(editor);
-    setMonacoInstance(monaco);
+    setMonacoInstance(monacoInstance);
   };
 
   useEffect(() => {
@@ -248,7 +249,6 @@ const ZenMonacoPrime = function ZenMonacoPrime(props: ZenMonacoPrimeProps) {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', ...props.style }}>
-      {/* Conditionally render the top bar based on hideTopBar prop */}
       {!props.hideTopBar && (
         <div
           style={{
