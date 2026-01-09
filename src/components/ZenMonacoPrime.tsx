@@ -187,7 +187,7 @@ const ZenMonacoPrime = function ZenMonacoPrime(props: ZenMonacoPrimeProps) {
     if (!editor || !monacoInstance) return;
     const model = editor.getModel();
     if (!model) return;
-    monacoInstance.monaco.editor.setModelMarkers(model, 'openscad', props.markers ?? []);
+    monacoInstance.editor.setModelMarkers(model, 'openscad', props.markers ?? []);
   }, [props.markers]);
 
   useEffect(() => {
