@@ -63,6 +63,12 @@
 }
 
 .p-tabview-ink-bar {
+  background: var(--theme-color);
+}
+.p-slider .p-slider-range {
+  background: var(--theme-color);
+}
+.p-slider .p-slider-handle {
   background: var(--theme-color-muted);
 }
 
@@ -212,7 +218,7 @@ pre code {
   padding: 16px;
 }
 .model-card .p-card-footer {
-  padding: 0px;
+  padding: 0;
 }
 
 .card-body-p16 .p-card-body {
