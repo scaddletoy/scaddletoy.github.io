@@ -15,7 +15,7 @@ export default function SearchPage() {
     };
     window.addEventListener('hashchange', onQueryChange);
     return () => window.removeEventListener('hashchange', onQueryChange);
-  }, []);
+  }, [window.location.hash]);
   return (
     <div
       style={{
@@ -26,12 +26,11 @@ export default function SearchPage() {
         gap: 16,
       }}
     >
-      <IconField iconPosition="left">
+      <IconField iconPosition="left" className="show-on-very-small" style={{ width: '100%' }}>
         <InputIcon className="pi pi-search"> </InputIcon>
         <InputText
-          className="p-inputtext-lg"
+          style={{ width: '100%' }}
           placeholder="Search"
-          tooltip="Searches model title and description"
           tooltipOptions={{ position: 'bottom' }}
           onKeyDown={(e) => {
             if (e.key === 'Enter') {
