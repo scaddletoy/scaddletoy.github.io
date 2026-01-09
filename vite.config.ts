@@ -97,5 +97,7 @@ export default defineConfig({
   },
   define: {
     __DEV__: process.env.NODE_ENV !== 'production',
+    VITE_COMMIT_HASH: "'" + (process.env.VITE_COMMIT_HASH ?? 'main') + "'",
+    VITE_BUILD_DATE: "'" + (process.env.VITE_BUILD_DATE ?? 'now') + "'",
   },
 });
