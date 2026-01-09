@@ -11,11 +11,13 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'autoUpdate',
+      injectRegister: 'auto',
       devOptions: {
         enabled: !isDev,
       },
       workbox: {
         maximumFileSizeToCacheInBytes: 200 * 1024 * 1024,
+        cleanupOutdatedCaches: true,
         clientsClaim: true,
         skipWaiting: true,
         runtimeCaching: [
