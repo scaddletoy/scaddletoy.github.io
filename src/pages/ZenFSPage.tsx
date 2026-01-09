@@ -146,7 +146,7 @@ export default function ZenFSPage() {
       icon: 'pi pi-link',
       disabled:
         !selectedNode?.leaf
-        && !(((selectedNode?.key as string).match(/^\/src\//)?.length ?? 0) > 0),
+        && !(((selectedNode?.key as string | undefined)?.match(/^\/src\//)?.length ?? 0) > 0),
       command: () => {
         const match = (selectedNode?.key as string).match(/^\/src\/([^/]+)\/?/);
         if (!match) throw new Error('No match found');
