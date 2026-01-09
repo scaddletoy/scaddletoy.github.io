@@ -151,6 +151,22 @@ pre code {
   color: var(--color-danger);
 }
 
+.p-progress-spinner-circle {
+  stroke-dasharray: 89, 200;
+  stroke-dashoffset: 0;
+  animation: p-progress-spinner-dash 1.5s ease-in-out infinite, p-progress-spinner-color-gray 5s ease-in-out infinite;
+  stroke-linecap: round;
+}
+
+@keyframes p-progress-spinner-color-gray {
+  100%, 0% {
+    stroke: var(--theme-color);
+  }
+  50% {
+    stroke: #eee;
+  }
+}
+
 /* -------------------- MISC -------------------- */
 
 .nav .button-smaller-padding {
