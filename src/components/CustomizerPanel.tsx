@@ -2,15 +2,15 @@
 
 import React, { CSSProperties } from 'react';
 
-import { Dropdown } from 'primereact/dropdown';
-import { Slider } from 'primereact/slider';
-import { Checkbox } from 'primereact/checkbox';
+import { Parameter, ParameterSet } from '../services/openscad-wasm-runner/actions.ts';
+import { CenteredSpinner } from './CenteredSpinner.tsx';
 import { InputNumber } from 'primereact/inputnumber';
 import { InputText } from 'primereact/inputtext';
 import { Fieldset } from 'primereact/fieldset';
-import { Button } from 'primereact/button';
-import { Parameter, ParameterSet } from '../services/openscad-wasm-runner/actions.ts';
-import { CenteredSpinner } from './CenteredSpinner.tsx';
+import { Dropdown } from 'primereact/dropdown';
+import { Checkbox } from 'primereact/checkbox';
+import { Slider } from 'primereact/slider';
+import styles from './CustomizerPanel.module.css';
 
 interface CustomizerProps {
   className?: string;
@@ -33,106 +33,77 @@ export default function CustomizerPanel(props: CustomizerProps) {
   );
 
   const groups = Object.entries(groupedParameters);
+  const skipSingleRootGroup = groups.length === 1;
 
   return props.parameterSet ?
       <div
-        className={props.className}
-        style={{
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          overflowY: 'scroll',
-          // overflowX: 'hidden',
-          padding: 16,
-          ...props.style,
-          bottom: 'unset',
-        }}
+        className={styles.customizerRoot + (props.className ? ' ' + props.className : '')}
+        style={props.style}
       >
-        {groups.map(([group, params]) => (
-          <Fieldset
-            style={{
-              width: '99%',
-              backgroundColor: 'transparent',
-              // backgroundColor: 'rgba(255,255,255,0.4)',
-            }}
-            key={group}
-            legend={group}
-            toggleable={true}
-          >
-            {params.map((param) => (
-              <ParameterInput
-                key={param.name}
-                value={props.parameterValues[param.name]}
-                param={param}
-                handleChange={props.onChange}
-              />
-            ))}
-          </Fieldset>
-        ))}
+        {groups.map(([group, params]) =>
+          skipSingleRootGroup ?
+            <>
+              {params.map((param) => (
+                <ParameterInput
+                  key={param.name}
+                  value={props.parameterValues[param.name]}
+                  param={param}
+                  handleChange={props.onChange}
+                />
+              ))}
+            </>
+          : <Fieldset className={styles.customizerFieldset} key={group} legend={group} toggleable>
+              {params.map((param) => (
+                <ParameterInput
+                  key={param.name}
+                  value={props.parameterValues[param.name]}
+                  param={param}
+                  handleChange={props.onChange}
+                />
+              ))}
+            </Fieldset>,
+        )}
       </div>
-    : <CenteredSpinner style={props.style} text="Waiting for customizer to run" />;
+    : <CenteredSpinner text="Waiting for customizer to run" />;
 }
 
 function ParameterInput({
   param,
   value,
-  className,
   style,
   handleChange,
 }: {
   param: Parameter;
   value: any;
-  className?: string;
-  style?: CSSProperties;
+  style?: React.CSSProperties;
   handleChange: (key: string, value: any) => void;
 }) {
+  const resetVisible =
+    value !== undefined && JSON.stringify(value) !== JSON.stringify(param.initial);
   return (
-    <div
-      style={{
-        flex: 1,
-        ...style,
-        display: 'flex',
-        marginTop: 8,
-        marginBottom: 8,
-        flexDirection: 'column',
-      }}
-    >
-      <div
-        style={{
-          flex: 1,
-          display: 'flex',
-          gap: 8,
-          flexDirection: 'row',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          flexWrap: 'wrap',
-        }}
-      >
-        <div
-          style={{
-            flex: 1,
-            display: 'flex',
-            flexDirection: 'column',
-            minWidth: 100,
-          }}
-        >
-          <label>
+    <div className={styles.parameterInput} style={style}>
+      <div className={styles.parameterInputRow}>
+        <div className={styles.parameterInputLeft}>
+          <label className={styles.parameterInputLabel}>
             <b>{param.name}</b>
+            <i
+              className={
+                'pi pi-refresh '
+                + styles.parameterInputReset
+                + ' '
+                + (resetVisible ?
+                  styles.parameterInputResetVisible
+                : styles.parameterInputResetHidden)
+              }
+              onClick={() => handleChange(param.name, param.initial)}
+            ></i>
           </label>
-          <div style={{ wordBreak: 'break-all' }}>{param.caption}</div>
+          <div className={styles.parameterInputCaption}>{param.caption}</div>
         </div>
-        <div
-          style={{
-            flex: 1,
-            display: 'flex',
-            flexDirection: 'row',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-          }}
-        >
+        <div className={styles.parameterInputRight}>
           {param.type === 'number' && 'options' in param && (
             <Dropdown
-              style={{ flex: 1 }}
+              className={styles.parameterInputDropdown}
               value={value || param.initial}
               options={param.options}
               onChange={(e) => handleChange(param.name, e.value)}
@@ -142,6 +113,7 @@ function ParameterInput({
           )}
           {param.type === 'string' && param.options && (
             <Dropdown
+              className={styles.parameterInputDropdown}
               value={value || param.initial}
               options={param.options}
               onChange={(e) => handleChange(param.name, e.value)}
@@ -157,7 +129,7 @@ function ParameterInput({
           )}
           {!Array.isArray(param.initial) && param.type === 'number' && !('options' in param) && (
             <InputNumber
-              style={{ flex: 1 }}
+              className={styles.parameterInputNumber}
               value={value || param.initial}
               showButtons
               size={5}
@@ -166,22 +138,16 @@ function ParameterInput({
           )}
           {param.type === 'string' && !param.options && (
             <InputText
-              style={{ flex: 1 }}
+              className={styles.parameterInputText}
               value={value || param.initial}
               onChange={(e) => handleChange(param.name, e.target.value)}
             />
           )}
           {Array.isArray(param.initial) && 'min' in param && (
-            <div
-              style={{
-                flex: 1,
-                display: 'flex',
-                flexDirection: 'row',
-              }}
-            >
+            <div className={styles.parameterInputArrayRow}>
               {param.initial.map((_, index) => (
                 <InputNumber
-                  style={{ flex: 1 }}
+                  className={styles.parameterInputNumber}
                   key={index}
                   value={value?.[index] ?? (param.initial as any)[index]}
                   min={param.min}
@@ -198,28 +164,11 @@ function ParameterInput({
               ))}
             </div>
           )}
-          <Button
-            onClick={() => handleChange(param.name, param.initial)}
-            style={{
-              marginRight: '0',
-              visibility:
-                value === undefined || JSON.stringify(value) === JSON.stringify(param.initial) ?
-                  'hidden'
-                : 'visible',
-            }}
-            tooltipOptions={{ position: 'left' }}
-            icon="pi pi-refresh"
-            className="p-button-text"
-          />
         </div>
       </div>
       {!Array.isArray(param.initial) && param.type === 'number' && param.min !== undefined && (
         <Slider
-          style={{
-            flex: 1,
-            minHeight: '5px',
-            margin: '5px 40px 5px 5px',
-          }}
+          className={styles.parameterInputSlider}
           value={value || param.initial}
           min={param.min}
           max={param.max}

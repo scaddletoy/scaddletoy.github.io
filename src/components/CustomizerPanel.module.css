@@ -1,0 +1,91 @@
+.customizerRoot {
+  display: flex;
+  flex-direction: column;
+  .p-fieldset-content {
+    padding: 0;
+  }
+  .p-inputtext {
+    padding: 8px;
+  }
+}
+
+.customizerFieldset {
+  width: 99%;
+  background-color: transparent;
+}
+
+.parameterInput {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  margin-top: 8px;
+  margin-bottom: 8px;
+}
+
+.parameterInputRow {
+  flex: 1;
+  display: flex;
+  gap: 8px;
+  flex-direction: row;
+  align-items: start;
+  justify-content: space-between;
+  flex-wrap: wrap;
+}
+
+.parameterInputLeft {
+  flex: 2;
+  display: flex;
+  flex-direction: column;
+  min-width: 100px;
+}
+
+.parameterInputLabel {
+  display: flex;
+  align-items: center;
+}
+
+.parameterInputReset {
+  padding-left: 8px;
+  cursor: pointer;
+}
+
+.parameterInputResetHidden {
+  visibility: hidden;
+}
+
+.parameterInputResetVisible {
+  visibility: visible;
+}
+
+.parameterInputCaption {
+  word-break: break-all;
+  font-size: 12px;
+}
+
+.parameterInputRight {
+  flex: 1;
+  display: flex;
+  flex-direction: row;
+  align-items: start;
+  height: 100%;
+  width: 100%;
+}
+
+.parameterInputDropdown,
+.parameterInputNumber,
+.parameterInputText {
+  flex: 1;
+  width: 100%;
+}
+
+.parameterInputArrayRow {
+  flex: 1;
+  display: flex;
+  flex-direction: row;
+}
+
+.parameterInputSlider {
+  flex: 1;
+  min-height: 5px;
+  margin-top: 5px;
+}

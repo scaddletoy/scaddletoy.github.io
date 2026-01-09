@@ -1,17 +1,17 @@
-import React, { useEffect, useState } from 'react';
-import { Card } from 'primereact/card';
-import { InputTextarea } from 'primereact/inputtextarea';
-import { Button } from 'primereact/button';
 import { SupabaseService, ViewModelComment } from '../services/SupabaseService.ts';
 import { formatDate, formatDateTime, sanitizeAndLinkify } from '../utils';
-import { CenteredSpinner } from './CenteredSpinner.tsx';
 import { useUserContext } from '../state/UseUserContext.tsx';
+import { InputTextarea } from 'primereact/inputtextarea';
+import { CenteredSpinner } from './CenteredSpinner.tsx';
+import React, { useEffect, useState } from 'react';
+import { Button } from 'primereact/button';
+import { Panel } from 'primereact/panel';
 
-interface CommentsCardProps {
+interface CommentsPanelProps {
   modelId: string;
 }
 
-export const CommentsCard: React.FC<CommentsCardProps> = ({ modelId }) => {
+export const CommentsPanel: React.FC<CommentsPanelProps> = ({ modelId }) => {
   const userContext = useUserContext();
 
   const [comments, setComments] = useState<ViewModelComment[]>([]);
@@ -61,11 +61,7 @@ export const CommentsCard: React.FC<CommentsCardProps> = ({ modelId }) => {
   };
 
   return (
-    <Card
-      title="Comments"
-      style={{ flex: 1, background: '#111' }}
-      className="card-body-p16 comments"
-    >
+    <Panel toggleable header="Comments" style={{ flex: 1 }} className="panel-comments">
       {loading ?
         <CenteredSpinner text="Loading comments" />
       : <>
@@ -102,6 +98,6 @@ export const CommentsCard: React.FC<CommentsCardProps> = ({ modelId }) => {
           }
         </>
       }
-    </Card>
+    </Panel>
   );
 };

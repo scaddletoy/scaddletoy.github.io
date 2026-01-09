@@ -1,37 +1,37 @@
-import { Card } from 'primereact/card';
-import { TabPanel, TabView } from 'primereact/tabview';
-import { Button } from 'primereact/button';
-import { InputText } from 'primereact/inputtext';
-import ZenMonacoPrime from '../components/ZenMonacoPrime.tsx';
-import ModelViewer, { ModelViewerHandle } from '../components/ModelViewer.tsx';
-import { useCallback, useEffect, useRef, useState } from 'react';
 import {
   checkSyntax,
   OpenSCADRenderArgs,
   ParameterSet,
   render as runOpenSCADRender,
 } from '../services/openscad-wasm-runner/actions.ts';
-import { fs } from '@zenfs/core';
-import { exportGlb } from '../services/io/export_glb.ts';
-import { parseOff } from '../services/io/import_off.ts';
-import { Menubar } from 'primereact/menubar';
-import CustomizerPanel from '../components/CustomizerPanel.tsx';
-import { Dialog } from 'primereact/dialog';
-import { ModelCard } from '../components/ModelCard';
 import { EditModel, SupabaseService, ViewModelDetails } from '../services/SupabaseService.ts';
-import { Toast } from 'primereact/toast';
-import defaultScad from '../components/default-scad.ts';
 import { createEditorZenFS, readFileSafe, writeFileSafe } from '../services/fs/filesystem.ts';
-import { InputTextarea } from 'primereact/inputtextarea';
-import { exportStl } from '../services/io/export_stl';
+import { formatDate, getHashQueryParam, hashSha1, sanitizeAndLinkify } from '../utils.ts';
+import ModelViewer, { ModelViewerHandle } from '../components/ModelViewer.tsx';
+import { CenteredSpinner } from '../components/CenteredSpinner.tsx';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import CustomizerPanel from '../components/CustomizerPanel.tsx';
+import { CommentsPanel } from '../components/CommentsPanel.tsx';
+import ZenMonacoPrime from '../components/ZenMonacoPrime.tsx';
+import { useUserContext } from '../state/UseUserContext.tsx';
 import { ProgressSpinner } from 'primereact/progressspinner';
 import { ModelStats } from '../components/ModelStats.tsx';
-import { formatDate, getHashQueryParam, hashSha1, sanitizeAndLinkify } from '../utils.ts';
-import { CommentsCard } from '../components/CommentsCard';
-import { CenteredSpinner } from '../components/CenteredSpinner.tsx';
+import { exportGlb } from '../services/io/export_glb.ts';
+import { InputTextarea } from 'primereact/inputtextarea';
+import defaultScad from '../components/default-scad.ts';
+import { parseOff } from '../services/io/import_off.ts';
+import { exportStl } from '../services/io/export_stl';
+import { ModelCard } from '../components/ModelCard';
+import { InputText } from 'primereact/inputtext';
+import styles from './EditorPage.module.css';
+import { Menubar } from 'primereact/menubar';
 import { useParams } from 'react-router-dom';
-import { useUserContext } from '../state/UseUserContext.tsx';
 import type * as monaco from 'monaco-editor';
+import { Dialog } from 'primereact/dialog';
+import { Button } from 'primereact/button';
+import { Toast } from 'primereact/toast';
+import { Panel } from 'primereact/panel';
+import { fs } from '@zenfs/core';
 
 type EditorPageProps = {
   viewModelId?: string;
@@ -223,9 +223,12 @@ export default function EditorPage({ viewModelId }: EditorPageProps) {
   };
 
   const handleFetchRemoteFile = async () => {
+    let modelSource: string | undefined = defaultScad;
     const indexScadFilePath = getIndexScadFilePath();
-    const modelSource = await SupabaseService.fetchModelSource(currentModelId);
-    if (modelSource === undefined) throw new Error('Failed to fetch model source');
+    if (currentModelId !== 'new') {
+      modelSource = await SupabaseService.fetchModelSource(currentModelId);
+      if (modelSource === undefined) throw new Error('Failed to fetch model source');
+    }
     writeFileSafe(indexScadFilePath, modelSource, true);
     setEditorReloadKey((k) => k + 1);
   };
@@ -329,192 +332,214 @@ export default function EditorPage({ viewModelId }: EditorPageProps) {
     return customizer();
   }
 
-  return (
-    <div
-      className="editor-page-container"
-      style={{ flexDirection: largePreview ? 'column' : undefined }}
-    >
-      {/* Left column: 1/3 width */}
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 16 }}>
-        <div
-          style={{
-            background: '#111',
-            display: 'flex',
-            flexDirection: 'column',
-          }}
-        >
-          <div
-            style={{
-              width: '100%',
-              maxHeight: '85vh',
-              aspectRatio: '1 / 1',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-            }}
-          >
-            {glbFileUrl ?
-              <ModelViewer
-                ref={viewerRef}
-                lightMode={isLightMode}
-                style={{ width: '100%', height: '100%' }}
-                modelUri={glbFileUrl}
-              />
-            : <CenteredSpinner text="Waiting for model to render" />}
-          </div>
-          <Menubar
-            model={[
-              largePreview ?
-                {
-                  label: 'Smaller Preview',
-                  className: 'editor-page-hide-on-small',
-                  icon: 'pi pi-window-minimize',
-                  command: () => setLargePreview(false),
-                }
-              : {
-                  label: 'Larger Preview',
-                  className: 'editor-page-hide-on-small',
-                  icon: 'pi pi-window-maximize',
-                  command: () => setLargePreview(true),
-                },
-              isLightMode ?
-                { label: 'Dark Mode', icon: 'pi pi-moon', command: () => setIsLightMode(false) }
-              : { label: 'Light Mode', icon: 'pi pi-sun', command: () => setIsLightMode(true) },
-              {
-                label: 'Reset View',
-                icon: 'pi pi-refresh',
-                command: () => {
-                  viewerRef.current?.resetView();
-                },
-              },
-              {
-                label: 'Download',
-                icon: 'pi pi-download',
-                items: [
-                  {
-                    label: 'GLB',
-                    icon: 'pi pi-download',
-                    disabled: !glbFileUrl,
-                    command: () => {
-                      if (glbFileUrl) downloadUrl(glbFileUrl, getTitle() + '.glb');
-                    },
-                  },
-                  {
-                    label: 'OFF',
-                    icon: 'pi pi-download',
-                    disabled: !offFileUrl,
-                    command: () => {
-                      if (offFileUrl) downloadUrl(offFileUrl, getTitle() + '.off');
-                    },
-                  },
-                  {
-                    label: 'STL (F7)',
-                    icon: 'pi pi-download',
-                    disabled: !offFileUrl,
-                    command: downloadStl,
-                  },
-                ],
-              },
-            ]}
-            style={{
-              padding: 8,
-              background: 'none',
-              border: 'none',
-            }}
-          />
-        </div>
+  const showEditModelDetails =
+    !isReadonly
+    && (viewModel === undefined || viewModel?.owner_id === user?.id)
+    && editModel !== undefined;
 
-        {(
-          !isReadonly
-          && user?.id !== undefined
-          && (viewModel === undefined || viewModel?.owner_id === user?.id)
-          && editModel !== undefined
-        ) ?
-          <Card className="card-body-p16" style={{ background: '#111' }}>
-            <div
-              style={{
-                display: 'grid',
-                gridTemplateColumns: 'max-content 1fr',
-                gap: 12,
-                alignItems: 'center',
-                marginBottom: 8,
-              }}
-            >
-              <label htmlFor="edit-title" style={{ whiteSpace: 'nowrap' }}>
-                <b>Title</b>
-              </label>
-              <InputText
-                id="edit-title"
-                maxLength={100}
-                value={editModel.title}
-                onChange={(e) =>
-                  setEditModel((m) => ({ ...m, title: e.target.value }) as EditModel)
-                }
-                placeholder="Enter model title"
-              />
-              <label htmlFor="edit-description" style={{ whiteSpace: 'nowrap' }}>
-                <b>Description</b>
-              </label>
-              <InputTextarea
-                id="edit-description"
-                maxLength={2000}
-                value={editModel.description}
-                onChange={(e) =>
-                  setEditModel((m) => ({ ...m, description: e.target.value }) as EditModel)
-                }
-                placeholder="Enter model description"
-                style={{ resize: 'vertical' }}
-              />
-            </div>
-          </Card>
-        : viewModel !== undefined ?
-          <Card title={viewModel.title} className="card-body-p16" style={{ background: '#111' }}>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-              <div
-                dangerouslySetInnerHTML={{ __html: sanitizeAndLinkify(viewModel.description) }}
-              ></div>
-              <span>
-                by <a href={'#/user/' + viewModel.username}>{viewModel.username}</a> on{' '}
-                {viewModel.created_at}
-              </span>
-              <span>
-                <ModelStats model={viewModel} />
-              </span>
-            </div>
-          </Card>
-        : <></>}
-        {viewModel ?
-          <CommentsCard modelId={viewModel?.id} />
-        : ''}
-      </div>
-      {/* Right column: 2/3 width */}
+  return (
+    <>
       <div
-        style={{
-          flex: 2,
-          display: 'flex',
-          flexDirection: 'column',
-          minWidth: 0,
-          gap: 16,
-          maxHeight: '90vh',
-        }}
+        className={styles.editorPageContainer}
+        style={{ flexDirection: largePreview ? 'column' : undefined }}
       >
-        <TabView
-          className="tab-view-flex"
-          activeIndex={activeTabIndex}
-          onTabChange={(e) => setActiveTabIndex(e.index)}
-          panelContainerStyle={{ padding: 0, background: '#111' }}
-        >
-          <TabPanel header="Customizer">
-            <CustomizerPanel
-              parameterSet={parameterSet}
-              parameterValues={parameterValues}
-              onChange={(name, value) => setParameterValues((prev) => ({ ...prev, [name]: value }))}
+        <div className={styles.sidebar}>
+          <div className={styles.modelViewerContainer}>
+            <div className={styles.modelViewer}>
+              {glbFileUrl ?
+                <ModelViewer
+                  ref={viewerRef}
+                  lightMode={isLightMode}
+                  style={{ width: '100%', height: '100%' }}
+                  modelUri={glbFileUrl}
+                />
+              : <CenteredSpinner text="Waiting for model to render" />}
+            </div>
+            <Menubar
+              model={[
+                largePreview ?
+                  {
+                    label: 'Smaller Preview',
+                    className: 'editor-page-hide-on-small',
+                    icon: 'pi pi-window-minimize',
+                    command: () => setLargePreview(false),
+                  }
+                : {
+                    label: 'Larger Preview',
+                    className: 'editor-page-hide-on-small',
+                    icon: 'pi pi-window-maximize',
+                    command: () => setLargePreview(true),
+                  },
+                isLightMode ?
+                  { label: 'Dark Mode', icon: 'pi pi-moon', command: () => setIsLightMode(false) }
+                : { label: 'Light Mode', icon: 'pi pi-sun', command: () => setIsLightMode(true) },
+                {
+                  label: 'Reset View',
+                  icon: 'pi pi-refresh',
+                  command: () => {
+                    viewerRef.current?.resetView();
+                  },
+                },
+                {
+                  label: 'Download',
+                  icon: 'pi pi-download',
+                  items: [
+                    {
+                      label: 'GLB',
+                      icon: 'pi pi-download',
+                      disabled: !glbFileUrl,
+                      command: () => {
+                        if (glbFileUrl) downloadUrl(glbFileUrl, getTitle() + '.glb');
+                      },
+                    },
+                    {
+                      label: 'OFF',
+                      icon: 'pi pi-download',
+                      disabled: !offFileUrl,
+                      command: () => {
+                        if (offFileUrl) downloadUrl(offFileUrl, getTitle() + '.off');
+                      },
+                    },
+                    {
+                      label: 'STL (F7)',
+                      icon: 'pi pi-download',
+                      disabled: !offFileUrl,
+                      command: downloadStl,
+                    },
+                  ],
+                },
+              ]}
             />
-          </TabPanel>
-          <TabPanel header="EditorPage" style={{ background: '#111' }}>
+          </div>
+
+          {showEditModelDetails ?
+            <Panel>
+              <div
+                style={{
+                  display: 'grid',
+                  gridTemplateColumns: 'max-content 1fr',
+                  gap: 12,
+                  alignItems: 'center',
+                  marginBottom: 8,
+                }}
+              >
+                <label htmlFor="edit-title" style={{ whiteSpace: 'nowrap' }}>
+                  <b>Title</b>
+                </label>
+                <InputText
+                  id="edit-title"
+                  maxLength={100}
+                  value={editModel.title}
+                  onChange={(e) =>
+                    setEditModel((m) => ({ ...m, title: e.target.value }) as EditModel)
+                  }
+                  placeholder="Enter model title"
+                />
+                <label htmlFor="edit-description" style={{ whiteSpace: 'nowrap' }}>
+                  <b>Description</b>
+                </label>
+                <InputTextarea
+                  id="edit-description"
+                  maxLength={2000}
+                  value={editModel.description}
+                  onChange={(e) =>
+                    setEditModel((m) => ({ ...m, description: e.target.value }) as EditModel)
+                  }
+                  placeholder="Enter model description"
+                  style={{ resize: 'vertical' }}
+                />
+              </div>
+            </Panel>
+          : viewModel !== undefined ?
+            <Panel toggleable header={viewModel.title}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                <div
+                  dangerouslySetInnerHTML={{ __html: sanitizeAndLinkify(viewModel.description) }}
+                ></div>
+                <span>
+                  by <a href={'#/user/' + viewModel.username}>{viewModel.username}</a> on{' '}
+                  {viewModel.created_at}
+                </span>
+                <span>
+                  <ModelStats model={viewModel} />
+                </span>
+              </div>
+            </Panel>
+          : <></>}
+
+          {viewModel ?
+            <CommentsPanel modelId={viewModel?.id} />
+          : ''}
+        </div>
+        <div className={styles.main}>
+          <div className={styles.mainSub}>
+            <Panel toggleable header="Customizer">
+              <CustomizerPanel
+                parameterSet={parameterSet}
+                parameterValues={parameterValues}
+                onChange={(name, value) =>
+                  setParameterValues((prev) => ({ ...prev, [name]: value }))
+                }
+              />
+            </Panel>
+            <Panel className={styles.panelLogs} toggleable header="Logs & Errors">
+              {error && (
+                <pre
+                  style={{
+                    color: 'var(--color-danger)',
+                  }}
+                >
+                  {error}
+                </pre>
+              )}
+              {logs && <pre>{logs}</pre>}
+              {!error && !logs && <pre>No logs or errors yet.</pre>}
+            </Panel>
+          </div>
+          <Panel className={styles.panelEditor}>
+            <Menubar
+              style={{ width: '100%' }}
+              model={[
+                {
+                  label: 'Preview (F5)',
+                  icon: 'pi pi-play',
+                  command: preview,
+                  disabled: runningTaskName !== undefined,
+                },
+                {
+                  label: 'Render (F6)',
+                  icon: 'pi pi-play',
+                  command: render,
+                  disabled: runningTaskName !== undefined,
+                },
+                {
+                  label: 'Publish (F8)',
+                  icon: 'pi pi-upload',
+                  command: handlePublish,
+                  disabled: runningTaskName !== undefined || user?.id === undefined,
+                  visible: viewModel === undefined || viewModel?.owner_id === user?.id,
+                },
+                {
+                  label: 'Overwrite with remote source',
+                  icon: 'pi pi-download color-danger',
+                  command: handleFetchRemoteFile,
+                  disabled: runningTaskName !== undefined,
+                  visible: outdated,
+                },
+              ]}
+              end={
+                <div style={{ display: 'flex', gap: 8 }}>
+                  {runningTaskName !== undefined && (
+                    <>
+                      <div style={{ flex: 1, alignContent: 'center' }}>{runningTaskName}</div>
+                      <ProgressSpinner style={{ width: 40, height: 40 }} strokeWidth="8" />
+                    </>
+                  )}
+                </div>
+              }
+            />
             <ZenMonacoPrime
               isInitializing={isLoading}
-              style={{ width: '100%', height: '100%' }}
               path={getIndexScadFilePath()}
               homeFileProp={getIndexScadFilePath()}
               hideTopBar={true}
@@ -522,78 +547,8 @@ export default function EditorPage({ viewModelId }: EditorPageProps) {
               onSave={(s) => handleOnSave()}
               reloadKey={editorReloadKey}
             />
-          </TabPanel>
-          <TabPanel header="Logs & Error">
-            <div style={{ overflow: 'auto' }}>
-              {error && (
-                <pre
-                  style={{
-                    margin: 0,
-                    padding: 16,
-                    background: 'transparent',
-                    color: 'var(--color-danger)',
-                  }}
-                >
-                  {error}
-                </pre>
-              )}
-              {logs && (
-                <pre style={{ margin: 0, padding: 16, background: 'transparent' }}>{logs}</pre>
-              )}
-              {!error && !logs && <span>No logs or errors yet.</span>}
-            </div>
-          </TabPanel>
-        </TabView>
-        <Menubar
-          model={[
-            {
-              label: 'Preview (F5)',
-              icon: 'pi pi-play',
-              command: preview,
-              disabled: runningTaskName !== undefined,
-            },
-            {
-              label: 'Render (F6)',
-              icon: 'pi pi-play',
-              command: render,
-              disabled: runningTaskName !== undefined,
-            },
-            ...(user ?
-              [
-                {
-                  label: 'Publish (F8)',
-                  icon: 'pi pi-upload',
-                  command: handlePublish,
-                  disabled: runningTaskName !== undefined,
-                  visible: viewModel === undefined || viewModel?.owner_id === user?.id,
-                },
-              ]
-            : []),
-            {
-              label: 'Overwrite with remote source',
-              icon: 'pi pi-download color-danger',
-              command: handleFetchRemoteFile,
-              disabled: runningTaskName !== undefined,
-              visible: outdated,
-            },
-          ]}
-          style={{
-            flex: 0,
-            background: '#111',
-            padding: 8,
-            border: 'none',
-          }}
-          end={
-            <div style={{ display: 'flex', gap: 8 }}>
-              {runningTaskName !== undefined && (
-                <>
-                  <div style={{ flex: 1, alignContent: 'center' }}>{runningTaskName}</div>
-                  <ProgressSpinner style={{ width: 40, height: 40 }} strokeWidth="8" />
-                </>
-              )}
-            </div>
-          }
-        />
+          </Panel>
+        </div>
       </div>
       <Dialog
         header="Publish Model"
@@ -635,6 +590,6 @@ export default function EditorPage({ viewModelId }: EditorPageProps) {
         )}
       </Dialog>
       <Toast ref={toastRef} position="top-right" />
-    </div>
+    </>
   );
 }

@@ -1,8 +1,9 @@
+import { viteStaticCopy } from 'vite-plugin-static-copy';
 import { defineConfig, type PluginOption } from 'vite';
+import { visualizer } from 'rollup-plugin-visualizer';
 import react from '@vitejs/plugin-react-swc';
 import { VitePWA } from 'vite-plugin-pwa';
-import { viteStaticCopy } from 'vite-plugin-static-copy';
-import { visualizer } from 'rollup-plugin-visualizer';
+import * as path from 'node:path';
 
 const isDev = process.env.NODE_ENV !== 'production';
 
@@ -57,6 +58,21 @@ export default defineConfig({
     visualizer() as PluginOption,
   ],
   base: '/',
+  css: {
+    modules: {
+      localsConvention: 'camelCase',
+      generateScopedName: (name: string, filename: string) => {
+        if (name.startsWith('p-') || name.startsWith('g-')) {
+          return name;
+        } else {
+          // prettier-ignore
+          return name+ '_'+ path.parse(filename).name
+            .replace('.module', '')
+            .replaceAll(/[^a-zA-Z0-9]/g, '_');
+        }
+      },
+    },
+  },
   build: {
     sourcemap: isDev ? true : 'hidden',
     rollupOptions: {
@@ -74,7 +90,7 @@ export default defineConfig({
     },
   },
   resolve: {
-    extensions: ['.tsx', '.ts', '.js', '.mjs', '.wasm'],
+    extensions: ['.tsx', '.ts', '.js', '.mjs', '.wasm', '.css'],
     alias: {
       // Add any needed aliases here
     },

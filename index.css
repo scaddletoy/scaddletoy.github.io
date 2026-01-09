@@ -90,6 +90,9 @@ a {
   text-decoration: none;
 }
 a > span,
+.clickable {
+  cursor: pointer;
+}
 span.clickable {
   display: inline-block;
 }
@@ -118,10 +121,28 @@ input:hover,
   border-color: #fff !important;
   text-decoration: none;
 }
-a:active > span,
-a:active,
-.clickable:active {
+
+a:active:hover > span,
+a:active:hover,
+.clickable:active:hover {
   transform: scale(0.95);
+  animation: clickable-shake 0.2s cubic-bezier(0.36, 0.07, 0.19, 0.97) both infinite;
+  animation-delay: 1s;
+}
+
+@keyframes clickable-shake {
+  0% {
+    transform: scale(0.95) translateX(0);
+  }
+  25% {
+    transform: scale(0.95) translateX(-1px);
+  }
+  75% {
+    transform: scale(0.95) translateX(1px);
+  }
+  100% {
+    transform: scale(0.95) translateX(0);
+  }
 }
 
 body {
@@ -160,12 +181,15 @@ pre code {
 .p-progress-spinner-circle {
   stroke-dasharray: 89, 200;
   stroke-dashoffset: 0;
-  animation: p-progress-spinner-dash 1.5s ease-in-out infinite, p-progress-spinner-color-gray 5s ease-in-out infinite;
+  animation:
+    p-progress-spinner-dash 1.5s ease-in-out infinite,
+    p-progress-spinner-color-gray 5s ease-in-out infinite;
   stroke-linecap: round;
 }
 
 @keyframes p-progress-spinner-color-gray {
-  100%, 0% {
+  100%,
+  0% {
     stroke: var(--theme-color);
   }
   50% {
@@ -221,16 +245,20 @@ pre code {
   padding: 0;
 }
 
-.card-body-p16 .p-card-body {
+.g-card-body-p16 .p-card-body {
   padding: 16px;
 }
-.card-body-p16 .p-card-content {
+.g-card-body-p16 .p-card-content {
   padding-top: 0;
   padding-bottom: 0;
 }
 
-.comments p {
-  margin-top: 0;
+.panel-comments {
+  max-height: 600px;
+  overflow-y: auto;
+  p {
+    margin-top: 0;
+  }
 }
 
 .page {
@@ -240,7 +268,7 @@ pre code {
 }
 
 .maxw {
-  max-width: 1800px;
+  max-width: 1920px;
   padding-left: 16px;
   padding-right: 16px;
   margin-left: auto;
@@ -266,34 +294,7 @@ pre code {
   justify-items: center;
 }
 
-.editor-page-container {
-  flex: 1;
-  display: flex;
-  gap: 16px;
-}
-
-.tab-view-flex {
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-}
-.tab-view-flex .p-tabview-panels {
-  height: 100%;
-}
-.tab-view-flex .p-tabview-panel {
-  height: 100%;
-}
-
 /* -------------------- MEDIA QUERIES -------------------- */
-
-@media (max-width: 1200px) {
-  .editor-page-container {
-    flex-direction: column;
-  }
-  .editor-page-hide-on-small {
-    display: none;
-  }
-}
 
 @media (min-width: 720px) {
   .show-on-very-small {
@@ -307,29 +308,5 @@ pre code {
   }
   .show-on-very-small {
     display: flex;
-  }
-}
-
-/* DISABLE PRIMEREACT MENUBAR COLLAPSING */
-@media (max-width: 960px) {
-  .editor-page-container :where(.p-menubar) .p-menubar-root-list {
-    position: static !important;
-    display: flex !important;
-    background: none !important;
-    box-shadow: none !important;
-    width: unset !important;
-    padding: 0 !important;
-    border: none !important;
-  }
-  .editor-page-container .p-menubar .p-menubar-root-list .p-menuitem {
-    width: unset !important;
-    position: relative !important;
-  }
-  .editor-page-container .p-menubar .p-menubar-button {
-    display: none !important;
-  }
-  .editor-page-container .p-menubar .p-menubar-root-list .p-submenu-list {
-    width: unset !important;
-    position: absolute !important;
   }
 }

@@ -12,6 +12,7 @@ export function ModelStats({ model }: ModelStatsProps) {
   const userContext = useUserContext();
 
   const handleLike = (e: React.MouseEvent) => {
+    if (!userContext.user) return;
     e.stopPropagation();
     const wasLiked = userContext.likedModelIds.has(model.id);
     SupabaseService.updateModelLike(model.id, !wasLiked).then(() =>
@@ -29,11 +30,16 @@ export function ModelStats({ model }: ModelStatsProps) {
   return (
     <div style={{ display: 'flex', gap: 16, alignItems: 'center' }}>
       <span
-        className="clickable"
-        style={{ display: 'flex', alignItems: 'center', gap: 4, cursor: 'pointer' }}
+        className={userContext.user ? 'clickable' : undefined}
+        style={{ display: 'flex', alignItems: 'center', gap: 4 }}
         onClick={handleLike}
       >
-        <i className="pi pi-heart" style={{ color: iLiked ? 'var(--theme-color)' : undefined }} />
+        <i
+          className="pi pi-heart"
+          style={{
+            color: iLiked ? 'var(--theme-color)' : undefined,
+          }}
+        />
         {likes}
       </span>
       <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>

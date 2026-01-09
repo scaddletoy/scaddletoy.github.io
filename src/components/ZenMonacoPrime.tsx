@@ -1,15 +1,15 @@
-import React, { CSSProperties, useCallback, useEffect, useRef, useState } from 'react';
-import Editor, { type Monaco } from '@monaco-editor/react';
-import { fs } from '@zenfs/core';
-import { TreeSelect } from 'primereact/treeselect';
-import { Menu } from 'primereact/menu';
-import { TreeNode } from 'primereact/treenode';
-import { Button } from 'primereact/button';
-import { CenteredSpinner } from './CenteredSpinner.tsx';
-import { useDebounceFn } from '../react-utils.ts';
-import type * as monaco from 'monaco-editor';
 import { registerOpenSCADLanguage } from '../services/monaco-language/openscad-register-language.ts';
+import React, { CSSProperties, useCallback, useEffect, useRef, useState } from 'react';
 import { zipArchives } from '../services/fs/zip-archives.ts';
+import Editor, { type Monaco } from '@monaco-editor/react';
+import { CenteredSpinner } from './CenteredSpinner.tsx';
+import { TreeSelect } from 'primereact/treeselect';
+import { useDebounceFn } from '../react-utils.ts';
+import { TreeNode } from 'primereact/treenode';
+import type * as monaco from 'monaco-editor';
+import { Button } from 'primereact/button';
+import { Menu } from 'primereact/menu';
+import { fs } from '@zenfs/core';
 
 interface ZenMonacoPrimeProps {
   style?: CSSProperties;
@@ -248,7 +248,7 @@ const ZenMonacoPrime = function ZenMonacoPrime(props: ZenMonacoPrimeProps) {
   ];
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', ...props.style }}>
+    <div style={{ flex: 1, display: 'flex', flexDirection: 'column', ...props.style }}>
       {!props.hideTopBar && (
         <div
           style={{
@@ -314,6 +314,7 @@ const ZenMonacoPrime = function ZenMonacoPrime(props: ZenMonacoPrimeProps) {
           <CenteredSpinner text="Loading filesystem" />
         : <Editor
             width="100%"
+            height="100%"
             defaultLanguage="openscad"
             value={initialFileContent}
             path={currentFile}
@@ -325,6 +326,12 @@ const ZenMonacoPrime = function ZenMonacoPrime(props: ZenMonacoPrimeProps) {
               fontSize: 16,
               lineNumbers: isSmall ? 'off' : 'on',
               minimap: { enabled: !isSmall },
+              scrollBeyondLastLine: false,
+              tabSize: 2,
+              insertSpaces: true,
+              detectIndentation: true,
+              maxTokenizationLineLength: 2000,
+              lineNumbersMinChars: 4,
             }}
             loading={<CenteredSpinner text="Loading monaco editor" />}
           />
