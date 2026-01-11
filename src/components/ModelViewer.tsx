@@ -181,8 +181,8 @@ const ModelViewer = forwardRef<ModelViewerHandle, ModelViewerProps>(
             axesOrbit.phi,
           );
           const newIndex =
-            dist < euclEps && radDist < radEps ?
-              (currentIndex + 1) % PREDEFINED_ORBITS.length
+            e.button == 2 ? 0
+            : dist < euclEps && radDist < radEps ? (currentIndex + 1) % PREDEFINED_ORBITS.length
             : currentIndex;
           const [name, theta, phi] = PREDEFINED_ORBITS[newIndex];
           Object.assign(modelOrbit, { theta, phi });
@@ -190,19 +190,29 @@ const ModelViewer = forwardRef<ModelViewerHandle, ModelViewerProps>(
             (modelViewerRef.current.cameraOrbit =
             axesViewerRef.current.cameraOrbit =
               modelOrbit.toString());
-          toastRef.current?.show({ severity: 'info', detail: `${name} view`, life: 1000 });
+          // toastRef.current?.show({ severity: 'info', detail: `${name} view`, life: 1000 });
           setInteractionPrompt('none');
+          e.stopPropagation();
+          e.preventDefault();
+        }
+      }
+
+      function onContextMenu(e: MouseEvent) {
+        if (e.target === axesViewerRef.current) {
+          e.preventDefault();
         }
       }
 
       window.addEventListener('mousedown', onMouseDown);
       window.addEventListener('mouseup', onMouseUp);
+      window.addEventListener('contextmenu', onContextMenu);
       // window.addEventListener('click', onClick);
 
       return () => {
         // window.removeEventListener('click', onClick);
         window.removeEventListener('mousedown', onMouseDown);
         window.removeEventListener('mouseup', onMouseUp);
+        window.removeEventListener('contextmenu', onContextMenu);
       };
     });
 

@@ -11,6 +11,7 @@ import 'primeflex/primeflex.min.css';
 import 'primereact/resources/primereact.min.css';
 import 'primeicons/primeicons.css';
 import '../index.css';
+import { UserPreferencesProvider } from './state/UserPreferences.tsx';
 
 const value = {
   hideOverlaysOnDocumentScrolling: true,
@@ -21,7 +22,9 @@ createRoot(document.getElementById('root')!).render(
     <HashRouter>
       <PrimeReactProvider value={value}>
         <UserContextProvider>
-          <App />
+          <UserPreferencesProvider>
+            <App />
+          </UserPreferencesProvider>
         </UserContextProvider>
       </PrimeReactProvider>
     </HashRouter>

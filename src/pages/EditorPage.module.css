@@ -123,6 +123,7 @@
   /* Hanging indent for wrapped lines */
   text-indent: -1em;
   padding: 0 0 0 1em;
+  line-height: 22px;
 }
 
 .editor-page-container .p-menubar {

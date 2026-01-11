@@ -131,7 +131,7 @@ const ZenMonacoPrime = function ZenMonacoPrime(props: ZenMonacoPrimeProps) {
     }
   };
 
-  const debouncedSave = useDebounceFn<string>((fileContent: string) => {
+  const debouncedSave = useDebounceFn((fileContent: string) => {
     if (isLoading || !currentFile) return;
     try {
       console.debug('ZenMonacoPrime', `Saving ${currentFile}`);

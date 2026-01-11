@@ -32,6 +32,8 @@ import { Button } from 'primereact/button';
 import { Toast } from 'primereact/toast';
 import { Panel } from 'primereact/panel';
 import { fs } from '@zenfs/core';
+import { useUserPreferences } from '../state/UseUserPreferences.tsx';
+import { useDebounceFn } from '../react-utils.ts';
 
 type EditorPageProps = {
   viewModelId?: string;
@@ -40,6 +42,7 @@ type EditorPageProps = {
 export default function EditorPage({ viewModelId }: EditorPageProps) {
   const { modelId } = useParams();
   if (modelId) viewModelId = modelId;
+  const [userPrefs, setUserPrefs] = useUserPreferences();
   const { user } = useUserContext();
   const isReadonly = getHashQueryParam('readonly') !== null;
   const [viewModel, setViewModel] = useState<ViewModelDetails | undefined>(undefined);
@@ -172,6 +175,7 @@ export default function EditorPage({ viewModelId }: EditorPageProps) {
   };
   const preview = useCallback(renderCreator(true), [parameterValues]);
   const render = useCallback(renderCreator(false), [parameterValues]);
+  const debouncedPreview = useDebounceFn(preview, 1000);
 
   // Handler for publish action
   const handlePublish = async () => {
@@ -327,9 +331,9 @@ export default function EditorPage({ viewModelId }: EditorPageProps) {
     return viewModel?.title ?? editModel?.title ?? 'Untitled Model';
   }
 
-  function handleOnSave() {
+  async function handleOnSave() {
     setIsOutdated(true);
-    return customizer();
+    await Promise.all([customizer(), userPrefs.autoPreview ? preview() : Promise.resolve()]);
   }
 
   const showEditModelDetails =
@@ -373,13 +377,6 @@ export default function EditorPage({ viewModelId }: EditorPageProps) {
                 isLightMode ?
                   { label: 'Dark Mode', icon: 'pi pi-moon', command: () => setIsLightMode(false) }
                 : { label: 'Light Mode', icon: 'pi pi-sun', command: () => setIsLightMode(true) },
-                {
-                  label: 'Reset View',
-                  icon: 'pi pi-refresh',
-                  command: () => {
-                    viewerRef.current?.resetView();
-                  },
-                },
                 {
                   label: 'Download',
                   icon: 'pi pi-download',
@@ -468,7 +465,11 @@ export default function EditorPage({ viewModelId }: EditorPageProps) {
           : <></>}
 
           {viewModel ?
-            <CommentsPanel modelId={viewModel?.id} />
+            <CommentsPanel
+              modelId={viewModel?.id}
+              collapsed={!userPrefs.commentsPanelExpanded}
+              onToggle={(e) => setUserPrefs({ commentsPanelExpanded: !e.value })}
+            />
           : ''}
         </div>
         <div className={styles.main}>
@@ -477,12 +478,19 @@ export default function EditorPage({ viewModelId }: EditorPageProps) {
               <CustomizerPanel
                 parameterSet={parameterSet}
                 parameterValues={parameterValues}
-                onChange={(name, value) =>
-                  setParameterValues((prev) => ({ ...prev, [name]: value }))
-                }
+                onChange={(name, value) => {
+                  setParameterValues((prev) => ({ ...prev, [name]: value }));
+                  if (userPrefs.autoPreview) debouncedPreview();
+                }}
               />
             </Panel>
-            <Panel className={styles.panelLogs} toggleable header="Logs & Errors">
+            <Panel
+              className={styles.panelLogs}
+              toggleable
+              header="Logs & Errors"
+              collapsed={!userPrefs.logsPanelExpanded}
+              onToggle={(e) => setUserPrefs({ logsPanelExpanded: !e.value })}
+            >
               {error && (
                 <pre
                   style={{
@@ -525,6 +533,14 @@ export default function EditorPage({ viewModelId }: EditorPageProps) {
                   command: handleFetchRemoteFile,
                   disabled: runningTaskName !== undefined,
                   visible: outdated,
+                },
+                {
+                  icon: userPrefs.autoPreview ? 'pi pi-check-square' : 'pi pi-stop',
+                  label: 'Auto-Preview',
+                  disabled: false,
+                  command: () => {
+                    setUserPrefs({ autoPreview: !userPrefs.autoPreview });
+                  },
                 },
               ]}
               end={

@@ -104,7 +104,7 @@ function ParameterInput({
           {param.type === 'number' && 'options' in param && (
             <Dropdown
               className={styles.parameterInputDropdown}
-              value={value || param.initial}
+              value={value !== undefined && value !== null ? value : param.initial}
               options={param.options}
               onChange={(e) => handleChange(param.name, e.value)}
               optionLabel="name"
@@ -114,7 +114,7 @@ function ParameterInput({
           {param.type === 'string' && param.options && (
             <Dropdown
               className={styles.parameterInputDropdown}
-              value={value || param.initial}
+              value={value !== undefined && value !== null ? value : param.initial}
               options={param.options}
               onChange={(e) => handleChange(param.name, e.value)}
               optionLabel="name"
@@ -123,14 +123,14 @@ function ParameterInput({
           )}
           {param.type === 'boolean' && (
             <Checkbox
-              checked={value ?? param.initial}
+              checked={value !== undefined && value !== null ? value : param.initial}
               onChange={(e) => handleChange(param.name, e.checked)}
             />
           )}
           {!Array.isArray(param.initial) && param.type === 'number' && !('options' in param) && (
             <InputNumber
               className={styles.parameterInputNumber}
-              value={value || param.initial}
+              value={value !== undefined && value !== null ? value : param.initial}
               showButtons
               size={5}
               onValueChange={(e) => handleChange(param.name, e.value)}
@@ -139,7 +139,7 @@ function ParameterInput({
           {param.type === 'string' && !param.options && (
             <InputText
               className={styles.parameterInputText}
-              value={value || param.initial}
+              value={value !== undefined && value !== null ? value : param.initial}
               onChange={(e) => handleChange(param.name, e.target.value)}
             />
           )}
@@ -149,7 +149,11 @@ function ParameterInput({
                 <InputNumber
                   className={styles.parameterInputNumber}
                   key={index}
-                  value={value?.[index] ?? (param.initial as any)[index]}
+                  value={
+                    value?.[index] !== undefined && value?.[index] !== null ?
+                      value[index]
+                    : (param.initial as any)[index]
+                  }
                   min={param.min}
                   max={param.max}
                   showButtons
@@ -169,7 +173,7 @@ function ParameterInput({
       {!Array.isArray(param.initial) && param.type === 'number' && param.min !== undefined && (
         <Slider
           className={styles.parameterInputSlider}
-          value={value || param.initial}
+          value={value !== undefined && value !== null ? value : param.initial}
           min={param.min}
           max={param.max}
           step={param.step}

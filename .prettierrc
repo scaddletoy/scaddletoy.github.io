@@ -1,7 +1,4 @@
 {
-  "plugins": [
-    "prettier-plugin-brace-style"
-  ],
   "experimentalTernaries": true,
   "experimentalOperatorPosition": "start",
   "printWidth": 100,

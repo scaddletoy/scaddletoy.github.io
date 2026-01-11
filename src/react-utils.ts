@@ -1,17 +1,21 @@
 import { useCallback, useRef } from 'react';
 
-export function useDebounceFn<T>(setter: (value: T) => void, delay = 500): (value: T) => void {
+export function useDebounceFn<F extends (...args: any[]) => any>(fn: F, delay = 500): F {
   const timeoutRef = useRef<number | null>(null);
 
-  return useCallback(
-    (value: T) => {
+  // Create a debounced function with the same signature as F
+  const debouncedFn = useCallback(
+    (...args: Parameters<F>): ReturnType<F> | void => {
       if (timeoutRef.current) {
         clearTimeout(timeoutRef.current);
       }
       timeoutRef.current = window.setTimeout(() => {
-        setter(value);
+        fn(...args);
       }, delay);
+      // Debounced function does not return the result immediately
     },
-    [setter, delay],
+    [fn, delay],
   );
+
+  return debouncedFn as F;
 }

@@ -5,13 +5,15 @@ import { InputTextarea } from 'primereact/inputtextarea';
 import { CenteredSpinner } from './CenteredSpinner.tsx';
 import React, { useEffect, useState } from 'react';
 import { Button } from 'primereact/button';
-import { Panel } from 'primereact/panel';
+import { Panel, PanelToggleEvent } from 'primereact/panel';
 
 interface CommentsPanelProps {
   modelId: string;
+  collapsed?: boolean;
+  onToggle?: ((event: PanelToggleEvent) => void) | undefined;
 }
 
-export const CommentsPanel: React.FC<CommentsPanelProps> = ({ modelId }) => {
+export const CommentsPanel: React.FC<CommentsPanelProps> = ({ modelId, collapsed, onToggle }) => {
   const userContext = useUserContext();
 
   const [comments, setComments] = useState<ViewModelComment[]>([]);
@@ -61,7 +63,14 @@ export const CommentsPanel: React.FC<CommentsPanelProps> = ({ modelId }) => {
   };
 
   return (
-    <Panel toggleable header="Comments" style={{ flex: 1 }} className="panel-comments">
+    <Panel
+      toggleable
+      header="Comments"
+      style={{ flex: 1 }}
+      className="panel-comments"
+      collapsed={collapsed}
+      onToggle={onToggle}
+    >
       {loading ?
         <CenteredSpinner text="Loading comments" />
       : <>
