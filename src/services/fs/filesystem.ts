@@ -3,7 +3,7 @@
 import { deployedArchiveNames, zipArchives } from './zip-archives';
 import { configure, fs } from '@zenfs/core';
 import { Zip } from '@zenfs/archives';
-import { WebStorage } from '@zenfs/dom';
+import { IndexedDB } from '@zenfs/dom';
 import { logMethod } from '../../utils.ts';
 
 export type EmscriptenFSLike = typeof FS;
@@ -83,7 +83,7 @@ export async function createEditorZenFS(allowPersistence: boolean = false): Prom
     }
     await configure({
       mounts: {
-        ...(allowPersistence ? { '/src': { backend: WebStorage } } : {}),
+        ...(allowPersistence ? { '/src': { backend: IndexedDB } } : {}),
         ...allMounts,
       },
     });
