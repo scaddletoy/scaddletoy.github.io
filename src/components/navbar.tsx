@@ -19,7 +19,13 @@ export function Navbar() {
 
   const items: MenuItem[] = [
     { label: 'Libraries', url: '#/libraries' },
-    { label: 'Start Coding', url: '#/model/new' },
+    {
+      label: 'Start Coding',
+      command: () => {
+        window.location.href = '#/model/new';
+        window.location.reload();
+      },
+    },
   ];
   const end = (
     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
