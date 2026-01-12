@@ -12,6 +12,10 @@
 .customizerFieldset {
   width: 99%;
   background-color: transparent;
+  padding-bottom: 4px;
+  > .p-toggleable-content {
+    margin-top: -12px;
+  }
 }
 
 .parameterInput {
