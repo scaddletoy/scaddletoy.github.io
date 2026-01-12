@@ -1,2 +1,0 @@
-const __vite__mapDeps=(i,m=__vite__mapDeps,d=(m.f||(m.f=["assets/MarkdownRenderer-CSri1Zvn.js","index.js","index.css"])))=>i.map(i=>d[i]);
-import{j as r,r as e,l as t,_ as a}from"../index.js";const s=e.lazy(()=>a(()=>import("./MarkdownRenderer-CSri1Zvn.js"),__vite__mapDeps([0,1,2])));function d(n){return r.jsx(e.Suspense,{fallback:r.jsx(t,{text:"Rendering markdown"}),children:r.jsx(s,{...n})})}export{d as L};
