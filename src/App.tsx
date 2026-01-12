@@ -1,8 +1,9 @@
+import { lazy, Suspense, useEffect, useRef } from 'react';
+import { Toast } from 'primereact/toast';
 import { Navbar } from './components/navbar.tsx';
 import { Route, Routes } from 'react-router-dom';
 import { Footer } from './components/footer.tsx';
 import { NotFoundPage } from './pages/NotFoundPage.tsx';
-import { lazy, Suspense } from 'react';
 import { CenteredSpinner } from './components/CenteredSpinner.tsx';
 
 const HomePage = lazy(() => import('./pages/HomePage.tsx'));
@@ -16,6 +17,35 @@ const SearchPage = lazy(() => import('./pages/SearchPage.tsx'));
 const UserPage = lazy(() => import('./pages/UserPage.tsx'));
 
 function App() {
+  const toastRef = useRef<Toast>(null);
+
+  useEffect(() => {
+    const handleGlobalError = (event: ErrorEvent) => {
+      toastRef.current?.show({
+        severity: 'error',
+        summary: 'Unexpected Error',
+        detail: event.error,
+        sticky: true,
+        closable: true,
+      });
+    };
+    const handleRejection = (event: PromiseRejectionEvent) => {
+      toastRef.current?.show({
+        severity: 'error',
+        summary: 'Unhandled Promise Rejection',
+        detail: event.reason?.error || String(event.reason),
+        sticky: true,
+        closable: true,
+      });
+    };
+    window.addEventListener('error', handleGlobalError);
+    window.addEventListener('unhandledrejection', handleRejection);
+    return () => {
+      window.removeEventListener('error', handleGlobalError);
+      window.removeEventListener('unhandledrejection', handleRejection);
+    };
+  }, []);
+
   return (
     <div
       style={{
@@ -26,6 +56,7 @@ function App() {
         transition: 'background 0.3s, color 0.3s',
       }}
     >
+      <Toast ref={toastRef} position="top-right" />
       <div className="nav" style={{ flex: '0 0 auto', background: '#000' }}>
         <Navbar />
       </div>

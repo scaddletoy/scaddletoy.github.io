@@ -42,7 +42,7 @@ export default function CustomizerPanel(props: CustomizerProps) {
       >
         {groups.map(([group, params]) =>
           skipSingleRootGroup ?
-            <>
+            <div key={group}>
               {params.map((param) => (
                 <ParameterInput
                   key={param.name}
@@ -51,7 +51,7 @@ export default function CustomizerPanel(props: CustomizerProps) {
                   handleChange={props.onChange}
                 />
               ))}
-            </>
+            </div>
           : <Fieldset className={styles.customizerFieldset} key={group} legend={group} toggleable>
               {params.map((param) => (
                 <ParameterInput
@@ -64,7 +64,7 @@ export default function CustomizerPanel(props: CustomizerProps) {
             </Fieldset>,
         )}
       </div>
-    : <CenteredSpinner text="Waiting for customizer to run" />;
+    : <CenteredSpinner key="spinner" text="Waiting for customizer to run" />;
 }
 
 function ParameterInput({
@@ -103,6 +103,7 @@ function ParameterInput({
         <div className={styles.parameterInputRight}>
           {param.type === 'number' && 'options' in param && (
             <Dropdown
+              key={param.name}
               className={styles.parameterInputDropdown}
               value={value !== undefined && value !== null ? value : param.initial}
               options={param.options}
@@ -113,6 +114,7 @@ function ParameterInput({
           )}
           {param.type === 'string' && param.options && (
             <Dropdown
+              key={param.name}
               className={styles.parameterInputDropdown}
               value={value !== undefined && value !== null ? value : param.initial}
               options={param.options}
@@ -123,12 +125,14 @@ function ParameterInput({
           )}
           {param.type === 'boolean' && (
             <Checkbox
+              key={param.name}
               checked={value !== undefined && value !== null ? value : param.initial}
               onChange={(e) => handleChange(param.name, e.checked)}
             />
           )}
           {!Array.isArray(param.initial) && param.type === 'number' && !('options' in param) && (
             <InputNumber
+              key={param.name}
               className={styles.parameterInputNumber}
               value={value !== undefined && value !== null ? value : param.initial}
               showButtons
@@ -138,6 +142,7 @@ function ParameterInput({
           )}
           {param.type === 'string' && !param.options && (
             <InputText
+              key={param.name}
               className={styles.parameterInputText}
               value={value !== undefined && value !== null ? value : param.initial}
               onChange={(e) => handleChange(param.name, e.target.value)}
@@ -172,6 +177,7 @@ function ParameterInput({
       </div>
       {!Array.isArray(param.initial) && param.type === 'number' && param.min !== undefined && (
         <Slider
+          key={param.name}
           className={styles.parameterInputSlider}
           value={value !== undefined && value !== null ? value : param.initial}
           min={param.min}

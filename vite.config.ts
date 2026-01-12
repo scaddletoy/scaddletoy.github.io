@@ -98,8 +98,10 @@ export default defineConfig(({ command, mode }) => {
     },
     define: {
       __DEV__: isDev,
-      VITE_COMMIT_HASH: "'" + (env.VITE_COMMIT_HASH ?? 'main') + "'",
-      VITE_BUILD_DATE: "'" + (env.VITE_BUILD_DATE ?? 'now') + "'",
+      VITE_COMMIT_HASH:
+        "'" + (isDev || env.VITE_COMMIT_HASH === undefined ? 'main' : env.VITE_COMMIT_HASH) + "'",
+      VITE_BUILD_DATE:
+        "'" + (isDev || env.VITE_BUILD_DATE === undefined ? 'now' : env.VITE_BUILD_DATE) + "'",
     },
   };
 });
