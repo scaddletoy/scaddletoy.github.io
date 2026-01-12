@@ -75,6 +75,12 @@ export default function EditorPage({ viewModelId }: EditorPageProps) {
   const hasInitialized = useRef(false);
   const [editorReloadKey, setEditorReloadKey] = useState(0);
 
+  const parameterValuesRef = useRef(parameterValues);
+  // Keep the ref updated
+  useEffect(() => {
+    parameterValuesRef.current = parameterValues;
+  }, [parameterValues]);
+
   const getIndexScadFilePath = useCallback(() => {
     return `/src/${currentModelId}/index.scad`;
   }, [currentModelId]);
@@ -139,7 +145,7 @@ export default function EditorPage({ viewModelId }: EditorPageProps) {
         const renderArgs: OpenSCADRenderArgs = {
           scadPath: filePath,
           sources,
-          vars: parameterValues,
+          vars: parameterValuesRef.current,
           isPreview: isPreview,
           mountArchives: true,
           renderFormat: 'off',
