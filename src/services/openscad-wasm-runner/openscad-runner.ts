@@ -1,6 +1,7 @@
 // Portions of this file are Copyright 2021 Google LLC, and licensed under GPL2+. See COPYING.
 
 import { SimpleWorkerPool } from '../simple-worker-pool/simple-worker-pool.ts';
+import { __COMMIT_HASH__ } from '../../vars.ts';
 
 export type OpenSCADFile = {
   path: string;
@@ -33,7 +34,11 @@ export const workerPool = new SimpleWorkerPool<
   OpenSCADInvocation,
   OpenSCADInvocationResult,
   OpenSCADInvocationProgress
->(new URL('./openscad-worker.ts', import.meta.url) + '?v=' + Date.now(), {}, { type: 'module' });
+>(
+  new URL('./openscad-worker.ts', import.meta.url) + '?v=' + __COMMIT_HASH__,
+  {},
+  { type: 'module' },
+);
 
 export function spawnOpenSCAD(
   invocation: OpenSCADInvocation,

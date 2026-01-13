@@ -1,19 +1,16 @@
 import React from 'react';
 import about from '../../README.md';
 import LazyMarkdown from '../components/LazyMarkdown.tsx';
-
-declare const VITE_COMMIT_HASH: string;
-declare const VITE_BUILD_DATE: string;
+import { __BUILD_DATE__, __COMMIT_HASH__ } from '../vars.ts';
 
 export default function AboutPage() {
-  const commitLink =
-    'https://github.com/scaddletoy/scaddletoy.github.io/commit/' + VITE_COMMIT_HASH;
+  const commitLink = 'https://github.com/scaddletoy/scaddletoy.github.io/commit/' + __COMMIT_HASH__;
   return (
     <div className={'page'}>
       <LazyMarkdown content={about} />
       <hr />
       <p>
-        This version of the website was built on {VITE_BUILD_DATE} using{' '}
+        This version of the website was built on {__BUILD_DATE__} using{' '}
         <a href={commitLink} target="_blank" rel="noopener noreferrer">
           {commitLink}
         </a>

@@ -1,9 +1,6 @@
 // Portions of this file are Copyright 2021 Google LLC, and licensed under GPL2+. See COPYING.
 
-// fallback for __DEV__ if not replaced by Vite
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore
-export const __DEV__: boolean = typeof __INTERNAL_DEV__ !== 'undefined' ? __INTERNAL_DEV__ : true;
+import { __DEV__ } from './vars.ts';
 
 export function logDev(...args: any[]) {
   if (__DEV__) {

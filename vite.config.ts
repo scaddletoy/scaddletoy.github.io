@@ -97,11 +97,17 @@ export default defineConfig(({ command, mode }) => {
       },
     },
     define: {
-      __INTERNAL_DEV__: isDev ? 'true' : 'false',
+      VITE_DEV_MODE: isDev ? 'true' : 'false',
       VITE_COMMIT_HASH:
-        "'" + (isDev || env.VITE_COMMIT_HASH === undefined ? 'main' : env.VITE_COMMIT_HASH) + "'",
+        "'"
+        + (isDev || env.VITE_COMMIT_HASH === undefined ? Date.now() : env.VITE_COMMIT_HASH)
+        + "'",
       VITE_BUILD_DATE:
-        "'" + (isDev || env.VITE_BUILD_DATE === undefined ? 'now' : env.VITE_BUILD_DATE) + "'",
+        "'"
+        + (isDev || env.VITE_BUILD_DATE === undefined ?
+          new Date().toISOString()
+        : env.VITE_BUILD_DATE)
+        + "'",
     },
   };
 });
