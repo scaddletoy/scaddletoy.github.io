@@ -1,13 +1,32 @@
 import { Menubar } from 'primereact/menubar';
-import React from 'react';
+import { lazy, Suspense, useEffect } from 'react';
 import { IconField } from 'primereact/iconfield';
 import { InputIcon } from 'primereact/inputicon';
 import { InputText } from 'primereact/inputtext';
 import { MenuItem } from 'primereact/menuitem';
 import { useUserContext } from '../state/UseUserContext.tsx';
+import { useUserPreferences } from '../state/UseUserPreferences.tsx';
+
+const LazyWorkerPoolOverview = lazy(() => import('./WorkerPoolOverview.tsx'));
 
 export function Navbar() {
   const { user, username, login, logout } = useUserContext();
+  const [userPrefs, setUserPrefs] = useUserPreferences();
+
+  useEffect(() => {
+    const hash = window.location.hash;
+    let debugParam: string | null = null;
+    if (hash.includes('?')) {
+      const queryString = hash.substring(hash.indexOf('?') + 1);
+      const params = new URLSearchParams(queryString);
+      debugParam = params.get('debug');
+    }
+    if (debugParam === 'true' && !userPrefs.debugMode) {
+      setUserPrefs({ ...userPrefs, debugMode: true });
+    } else if (debugParam === 'false' && userPrefs.debugMode) {
+      setUserPrefs({ ...userPrefs, debugMode: false });
+    }
+  }, [setUserPrefs, userPrefs, window.location.hash]);
 
   const start = (
     <a href="#/" className="logo" style={{ fontSize: 24, paddingRight: 12 }}>
@@ -15,8 +34,22 @@ export function Navbar() {
     </a>
   );
 
-  const itemRenderer = (item: MenuItem) => item.data;
-
+  const debugItems: MenuItem[] = [
+    {
+      label: 'ZenFS',
+      command: () => {
+        window.location.href = '#/zenfs';
+      },
+    },
+    {
+      label: 'Workerpool',
+      template: () => (
+        <Suspense fallback={<span style={{ padding: 8 }}>Loading...</span>}>
+          <LazyWorkerPoolOverview />
+        </Suspense>
+      ),
+    },
+  ];
   const items: MenuItem[] = [
     { label: 'Libraries', url: '#/libraries' },
     {
@@ -26,6 +59,7 @@ export function Navbar() {
         window.location.reload();
       },
     },
+    ...(userPrefs.debugMode ? debugItems : []),
   ];
   const end = (
     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>

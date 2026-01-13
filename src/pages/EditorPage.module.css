@@ -39,6 +39,7 @@
   gap: 16px;
   .p-panel-content {
     min-width: 350px;
+    min-height: 30vh;
     max-height: 85vh;
     overflow: scroll;
   }

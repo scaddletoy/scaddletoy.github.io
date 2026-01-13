@@ -10,6 +10,7 @@ import type * as monaco from 'monaco-editor';
 import { Button } from 'primereact/button';
 import { Menu } from 'primereact/menu';
 import { fs } from '@zenfs/core';
+import { writeFileSafe } from '../services/fs/filesystem.ts';
 
 interface ZenMonacoPrimeProps {
   style?: CSSProperties;
@@ -135,13 +136,12 @@ const ZenMonacoPrime = function ZenMonacoPrime(props: ZenMonacoPrimeProps) {
     if (isLoading || !currentFile) return;
     try {
       console.debug('ZenMonacoPrime', `Saving ${currentFile}`);
-      fs.writeFileSync(currentFile, fileContent ?? '');
-      if (fileContent == initialFileContent) return;
+      writeFileSafe(currentFile, fileContent, true);
       props.onSave?.(fileContent);
     } catch (e) {
       showError('Failed to save file', e);
     }
-  }, 1000);
+  }, 500);
 
   const handleEditorChange = useCallback(
     (value: string | undefined) => {

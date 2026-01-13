@@ -15,7 +15,7 @@ export default defineConfig(({ command, mode }) => {
         registerType: 'autoUpdate',
         injectRegister: 'auto',
         devOptions: {
-          enabled: !isDev,
+          enabled: isDev,
         },
         workbox: {
           maximumFileSizeToCacheInBytes: 200 * 1024 * 1024,
@@ -97,7 +97,7 @@ export default defineConfig(({ command, mode }) => {
       },
     },
     define: {
-      __DEV__: isDev,
+      __INTERNAL_DEV__: isDev ? 'true' : 'false',
       VITE_COMMIT_HASH:
         "'" + (isDev || env.VITE_COMMIT_HASH === undefined ? 'main' : env.VITE_COMMIT_HASH) + "'",
       VITE_BUILD_DATE:

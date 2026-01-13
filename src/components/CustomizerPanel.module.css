@@ -82,6 +82,11 @@
   width: 100%;
 }
 
+.parameterInputCheckbox {
+  margin: 9px;
+  cursor: pointer;
+}
+
 .parameterInputArrayRow {
   flex: 1;
   display: flex;

@@ -2,16 +2,20 @@ import React, { ReactNode, useCallback, useEffect, useState } from 'react';
 import { UserPreferencesContext } from './UseUserPreferences.tsx';
 
 export interface UserPrefs {
+  debugMode: boolean;
   autoPreview: boolean;
   commentsPanelExpanded: boolean;
   logsPanelExpanded: boolean;
+  customizerPanelExpanded: boolean;
 }
 
 function getDefaultUserPrefs(): UserPrefs {
   return {
-    autoPreview: false,
+    debugMode: false,
+    autoPreview: true,
     commentsPanelExpanded: true,
-    logsPanelExpanded: true,
+    logsPanelExpanded: false,
+    customizerPanelExpanded: true,
   };
 }
 

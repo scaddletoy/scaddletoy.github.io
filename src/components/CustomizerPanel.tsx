@@ -126,6 +126,7 @@ function ParameterInput({
           {param.type === 'boolean' && (
             <Checkbox
               key={param.name}
+              className={styles.parameterInputCheckbox}
               checked={value !== undefined && value !== null ? value : param.initial}
               onChange={(e) => handleChange(param.name, e.checked)}
             />

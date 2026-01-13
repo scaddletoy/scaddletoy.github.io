@@ -1,6 +1,7 @@
 import React from 'react';
 import about from '../../README.md';
 import LazyMarkdown from '../components/LazyMarkdown.tsx';
+
 declare const VITE_COMMIT_HASH: string;
 declare const VITE_BUILD_DATE: string;
 

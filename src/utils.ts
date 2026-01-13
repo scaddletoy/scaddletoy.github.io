@@ -1,8 +1,11 @@
 // Portions of this file are Copyright 2021 Google LLC, and licensed under GPL2+. See COPYING.
 
-declare const __DEV__: boolean;
+// fallback for __DEV__ if not replaced by Vite
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore
+export const __DEV__: boolean = typeof __INTERNAL_DEV__ !== 'undefined' ? __INTERNAL_DEV__ : true;
 
-function logDev(...args: any[]) {
+export function logDev(...args: any[]) {
   if (__DEV__) {
     console.debug('[DEV]', ...args);
   }
@@ -45,8 +48,9 @@ export function logMethod<T extends (...args: any[]) => any>(fn: T, prefix?: str
     return ((...args: any[]) => {
       const callSite = extractCallSite(new Error());
       const argDict = Object.fromEntries(paramNames.map((name, i) => [name, args[i]]));
-      console.debug(`[DEV] ${definitionSite}${fn.name}() @ ${callSite}`, argDict);
-      return fn(...args);
+      const result: any = fn(...args);
+      console.debug(`[DEV] ${definitionSite}${fn.name}() @ ${callSite}`, argDict, result);
+      return result;
     }) as T;
   }
   return fn;
@@ -281,4 +285,47 @@ export async function hashSha1(content: string) {
   const hashBuffer = await crypto.subtle.digest('SHA-1', data);
   const hashArray = Array.from(new Uint8Array(hashBuffer));
   return hashArray.map((byte) => byte.toString(16).padStart(2, '0')).join('');
+}
+
+export function getPerformanceTimings() {
+  const marks = performance.getEntriesByType('mark');
+  let output = '';
+  for (let i = 0; i < marks.length; i++) {
+    const curr = marks[i];
+    const next = marks[i + 1];
+    const duration = next ? `${(next.startTime - curr.startTime).toFixed(0)} ms` : 'end';
+    output += curr.name + (next ? ` --(${duration})--> ` : '');
+  }
+  const total = marks[marks.length - 1].startTime - marks[0].startTime;
+  return '[PERFORMANCE] total (' + total + ' ms) | ' + output;
+}
+
+export function getPerformanceTotal() {
+  const marks = performance.getEntriesByType('mark');
+  return marks[marks.length - 1].startTime - marks[0].startTime;
+}
+
+/**
+ * Simple character-by-character diff between two strings.
+ * Returns an array of { type: 'equal' | 'add' | 'remove', char: string }
+ */
+export function diffStringsChar(oldStr: string, newStr: string) {
+  const result: { type: 'equal' | 'add' | 'remove'; char: string }[] = [];
+  let i = 0,
+    j = 0;
+  while (i < oldStr.length || j < newStr.length) {
+    if (i < oldStr.length && j < newStr.length && oldStr[i] === newStr[j]) {
+      // result.push({ type: 'equal', char: oldStr[i] });
+      i++;
+      j++;
+    } else if (j < newStr.length && (i >= oldStr.length || oldStr[i] !== newStr[j])) {
+      result.push({ type: 'add', char: newStr[j] });
+      j++;
+    } else if (i < oldStr.length && (j >= newStr.length || oldStr[i] !== newStr[j])) {
+      result.push({ type: 'remove', char: oldStr[i] });
+      i++;
+    }
+  }
+  if (result.length === 0) result.push({ type: 'equal', char: '' });
+  return result;
 }

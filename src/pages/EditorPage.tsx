@@ -6,7 +6,7 @@ import {
 } from '../services/openscad-wasm-runner/actions.ts';
 import { EditModel, SupabaseService, ViewModelDetails } from '../services/SupabaseService.ts';
 import { createEditorZenFS, readFileSafe, writeFileSafe } from '../services/fs/filesystem.ts';
-import { formatDate, getHashQueryParam, hashSha1, sanitizeAndLinkify } from '../utils.ts';
+import { formatDate, getHashQueryParam, hashSha1, logDev, sanitizeAndLinkify } from '../utils.ts';
 import ModelViewer, { ModelViewerHandle } from '../components/ModelViewer.tsx';
 import { CenteredSpinner } from '../components/CenteredSpinner.tsx';
 import { useCallback, useEffect, useRef, useState } from 'react';
@@ -117,9 +117,10 @@ export default function EditorPage({ viewModelId }: EditorPageProps) {
       const result = await checkSyntax({
         activePath: filePath,
         sources,
-      })({ now: true });
+      });
 
       if (result.parameterSet) {
+        logDev('Parameter set:', result.parameterSet);
         setParameterSet(result.parameterSet);
       }
       if (result.markers) {
@@ -140,7 +141,7 @@ export default function EditorPage({ viewModelId }: EditorPageProps) {
       setLogs(undefined);
       try {
         const filePath = getIndexScadFilePath();
-        let content = readFileSafe(filePath);
+        const content = readFileSafe(filePath);
         const sources = [{ path: filePath, content }];
         const renderArgs: OpenSCADRenderArgs = {
           scadPath: filePath,
@@ -154,7 +155,7 @@ export default function EditorPage({ viewModelId }: EditorPageProps) {
             if ('stdout' in ps) setLogs((l) => (l ? l + '\n' : '') + ps.stdout);
           },
         };
-        const result = await runOpenSCADRender(renderArgs)({ now: true });
+        const result = await runOpenSCADRender(renderArgs);
         if (offFileUrl) URL.revokeObjectURL(offFileUrl);
         setOffFileUrl(URL.createObjectURL(result.outFile));
 
@@ -181,7 +182,7 @@ export default function EditorPage({ viewModelId }: EditorPageProps) {
   };
   const preview = useCallback(renderCreator(true), [parameterValues]);
   const render = useCallback(renderCreator(false), [parameterValues]);
-  const debouncedPreview = useDebounceFn(preview, 1000);
+  const debouncedPreview = useDebounceFn(preview, 500);
 
   // Handler for publish action
   const handlePublish = async () => {
@@ -232,15 +233,13 @@ export default function EditorPage({ viewModelId }: EditorPageProps) {
     setPublishPreviewDataUrl(null);
   };
 
-  const handleFetchRemoteFile = async () => {
-    let modelSource: string | undefined = defaultScad;
-    const indexScadFilePath = getIndexScadFilePath();
-    if (currentModelId !== 'new') {
-      modelSource = await SupabaseService.fetchModelSource(currentModelId);
-      if (modelSource === undefined) throw new Error('Failed to fetch model source');
+  const handleOverwriteWithRemote = async () => {
+    if (viewModel?.source_code) {
+      const indexScadFilePath = getIndexScadFilePath();
+      writeFileSafe(indexScadFilePath, viewModel?.source_code, true);
+      setEditorReloadKey((k) => k + 1);
+      setIsOutdated(false);
     }
-    writeFileSafe(indexScadFilePath, modelSource, true);
-    setEditorReloadKey((k) => k + 1);
   };
 
   const fetchModelDetails = useCallback(async () => {
@@ -309,6 +308,20 @@ export default function EditorPage({ viewModelId }: EditorPageProps) {
   }, [offFileUrl]);
 
   useEffect(() => {
+    if (!parameterSet) return;
+    let newParameterValues: { [key: string]: any } | undefined = undefined;
+    for (const p of parameterSet.parameters) {
+      if (parameterValues[p.name] === p.initial) {
+        const { [p.name]: _, ...rest } = parameterValues;
+        newParameterValues = rest;
+      }
+    }
+    if (newParameterValues !== undefined) {
+      setParameterValues(newParameterValues);
+    }
+  }, [parameterValues, parameterSet]);
+
+  useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === 'F4') {
         event.preventDefault();
@@ -337,8 +350,12 @@ export default function EditorPage({ viewModelId }: EditorPageProps) {
     return viewModel?.title ?? editModel?.title ?? 'Untitled Model';
   }
 
-  async function handleOnSave() {
-    setIsOutdated(true);
+  async function handleOnSave(s: string) {
+    if (viewModel?.source_code?.trim() !== s.trim()) {
+      setIsOutdated(true);
+    } else {
+      setIsOutdated(false);
+    }
     await Promise.all([customizer(), userPrefs.autoPreview ? preview() : Promise.resolve()]);
   }
 
@@ -480,7 +497,12 @@ export default function EditorPage({ viewModelId }: EditorPageProps) {
         </div>
         <div className={styles.main}>
           <div className={styles.mainSub}>
-            <Panel toggleable header="Customizer">
+            <Panel
+              toggleable
+              header="Customizer"
+              collapsed={!userPrefs.customizerPanelExpanded}
+              onToggle={(e) => setUserPrefs({ customizerPanelExpanded: !e.value })}
+            >
               <CustomizerPanel
                 parameterSet={parameterSet}
                 parameterValues={parameterValues}
@@ -534,19 +556,19 @@ export default function EditorPage({ viewModelId }: EditorPageProps) {
                   visible: viewModel === undefined || viewModel?.owner_id === user?.id,
                 },
                 {
-                  label: 'Overwrite with remote source',
-                  icon: 'pi pi-download color-danger',
-                  command: handleFetchRemoteFile,
-                  disabled: runningTaskName !== undefined,
-                  visible: outdated,
-                },
-                {
                   icon: userPrefs.autoPreview ? 'pi pi-check-square' : 'pi pi-stop',
                   label: 'Auto-Preview',
                   disabled: false,
                   command: () => {
                     setUserPrefs({ autoPreview: !userPrefs.autoPreview });
                   },
+                },
+                {
+                  label: 'Overwrite with remote source',
+                  icon: 'pi pi-download color-danger',
+                  command: handleOverwriteWithRemote,
+                  disabled: runningTaskName !== undefined,
+                  visible: outdated,
                 },
               ]}
               end={
@@ -566,7 +588,7 @@ export default function EditorPage({ viewModelId }: EditorPageProps) {
               homeFileProp={getIndexScadFilePath()}
               hideTopBar={true}
               markers={markers}
-              onSave={(s) => handleOnSave()}
+              onSave={(s) => handleOnSave(s)}
               reloadKey={editorReloadKey}
             />
           </Panel>

@@ -34,7 +34,7 @@ export function CenteredSpinner({ style, text }: { style?: CSSProperties; text?:
             aria-label="Error"
           />
           <span>{text || 'loading'}</span>
-          <span>Failed...</span>
+          <span>timed out...</span>
         </>
       }
     </div>

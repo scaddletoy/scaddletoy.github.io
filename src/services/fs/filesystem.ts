@@ -66,7 +66,7 @@ export async function symlinkLibraries(
 
 let zenFSInitialized: Promise<void> | null = null;
 
-export async function createEditorZenFS(allowPersistence: boolean = false): Promise<void> {
+export async function createEditorZenFS(mountSrc: boolean = false): Promise<void> {
   if (zenFSInitialized) return zenFSInitialized;
   zenFSInitialized = (async () => {
     const allMounts = {};
@@ -83,7 +83,7 @@ export async function createEditorZenFS(allowPersistence: boolean = false): Prom
     }
     await configure({
       mounts: {
-        ...(allowPersistence ? { '/src': { backend: IndexedDB } } : {}),
+        ...(mountSrc ? { '/src': { backend: IndexedDB } } : {}),
         ...allMounts,
       },
     });
@@ -95,7 +95,6 @@ export const readFileSafe = logMethod(function readFileSafe(
   path: string,
   defaultContent?: string,
 ): string {
-  console.debug(`Reading file`, path, defaultContent);
   if (fs && fs.existsSync(path)) {
     return fs.readFileSync(path, 'utf8');
   } else if (defaultContent !== undefined) {
